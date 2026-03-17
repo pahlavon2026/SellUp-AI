@@ -1,0 +1,365 @@
+:root {
+    --apple-white: #FFFFFF;
+    --apple-off-white: #F5F5F7;
+    --apple-blue: #007AFF;
+    --apple-text: #1D1D1F;
+    --apple-text-secondary: #86868B;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --blur-radius: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--apple-off-white);
+    color: var(--apple-text);
+    overflow-x: hidden;
+    height: 100vh;
+}
+
+.apple-bg {
+    background: radial-gradient(circle at top right, #e8e8ed, #F5F5F7 60%);
+}
+
+/* Glassmorphism Utilities */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-radius));
+    -webkit-backdrop-filter: blur(var(--blur-radius));
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Hero Section */
+.hero-section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    opacity: 1; /* Changed from 0 to ensure visibility */
+    transform: translateY(20px);
+    animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.ai-gradient-text {
+    background: linear-gradient(90deg, #a445b2, #d41872, #ff0066);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: shine 3s linear infinite;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--apple-text-secondary);
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+}
+
+/* Apple Button */
+.apple-button {
+    background-color: var(--apple-blue);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.apple-button:active {
+    transform: scale(0.92) !important;
+}
+
+.haptic-tap {
+    animation: hapticPulse 0.3s ease-out;
+}
+
+@keyframes hapticPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.94); }
+    100% { transform: scale(1); }
+}
+
+/* Responsive Hero Title */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    .dock-icon {
+        width: 40px;
+        height: 40px;
+    }
+    .dock-icon i {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* MacOS Dock */
+.dock-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.dock-glass {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 0.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.dock-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--apple-text);
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.2s;
+    position: relative;
+}
+
+.dock-icon:hover {
+    transform: scale(1.5) translateY(-15px);
+    z-index: 1001;
+}
+
+.dock-icon i {
+    width: 24px;
+    height: 24px;
+}
+
+.dock-divider {
+    width: 1px;
+    height: 30px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 0 5px;
+}
+
+.ai-gradient-text {
+    background: linear-gradient(90deg, #a445b2, #d41872, #ff0066, #007AFF);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 5s ease infinite;
+}
+
+/* Module Specific Styles */
+.tool-card {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.tool-card:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateX(5px);
+}
+
+.tool-card i {
+    color: var(--apple-blue);
+}
+
+.keyword-tag {
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--apple-blue);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.activity-rings-container {
+    position: relative;
+    display: inline-block;
+}
+
+.ring-bg {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 8;
+}
+
+.ring-progress {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+.ring-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.studio-canvas {
+    background: #fff;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.glow-indicator {
+    padding: 8px 16px;
+    background: linear-gradient(90deg, #a445b2, #d41872);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Logo Animation (Apple Intelligence Style) */
+.apple-intelligence-logo {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #007AFF, #5856D6, #AF52DE);
+    border-radius: 22%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 25px rgba(88, 86, 214, 0.3);
+    animation: logoPulse 4s infinite ease-in-out;
+}
+
+.logo-s {
+    color: white;
+    font-size: 40px;
+    font-weight: 800;
+}
+
+.neural-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 15px white, 0 0 30px #AF52DE;
+    animation: neuralTrace 6s infinite linear;
+}
+
+@keyframes logoPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes neuralTrace {
+    0% { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+}
+
+/* Skeleton Screens */
+.skeleton-screen {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.skeleton-header {
+    height: 60px;
+    width: 300px;
+    background: linear-gradient(90deg, #EBEBEB 25%, #F5F5F7 50%, #EBEBEB 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 12px;
+}
+
+.skeleton-card {
+    height: 150px;
+    background: linear-gradient(90deg, #EBEBEB 25%, #F5F5F7 50%, #EBEBEB 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 18px;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Tooltips for Dock */
+.dock-icon::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+}
+
+.dock-icon:hover::after {
+    opacity: 1;
+}

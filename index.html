@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SellUp AI | High-End Marketplace Management</title>
+    <meta name="description" content="Premium AI-powered tools for marketplace sellers. High-end automation and design studio.">
+    <link rel="stylesheet" href="style.css">
+    <!-- SF Pro Display Font Fallback -->
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/sf-pro-display">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="apple-bg">
+    <div id="app">
+        <!-- Main Content Container -->
+        <main id="main-content" class="fade-in">
+            <!-- Hero Section -->
+            <section id="hero" class="hero-section">
+                <div class="hero-content">
+                    <div class="logo-container">
+                        <div class="apple-intelligence-logo">
+                            <span class="logo-s">S</span>
+                            <div class="neural-dot"></div>
+                        </div>
+                    </div>
+                    <h1 class="hero-title">Sotuvlaringizni <br><span class="ai-gradient-text">AI boshqaruviga</span> topshiring.</h1>
+                    <p class="hero-subtitle">SellUp AI – Marketplace boshqaruvining yangi davri.</p>
+                    <button class="apple-button glow-hover" id="start-btn">
+                        <span>Hoziroq boshlang</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- MacOS Dock Navigation -->
+        <nav class="dock-container">
+            <div class="dock-glass">
+                <div class="dock-icon" data-tooltip="Home" onclick="navigateTo('hero')">
+                    <i data-lucide="home"></i>
+                </div>
+                <div class="dock-icon" data-tooltip="Studio" onclick="navigateTo('studio')">
+                    <i data-lucide="layout-template"></i>
+                </div>
+                <div class="dock-icon" data-tooltip="Smart Cards" onclick="navigateTo('seo')">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <div class="dock-icon" data-tooltip="Support" onclick="navigateTo('support')">
+                    <i data-lucide="message-circle"></i>
+                </div>
+                <div class="dock-divider"></div>
+                <div class="dock-icon" data-tooltip="Account" onclick="openAuth()">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Skeleton Loader Template (Hidden) -->
+    <template id="skeleton-template">
+        <div class="skeleton-screen">
+            <div class="skeleton-header"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>
