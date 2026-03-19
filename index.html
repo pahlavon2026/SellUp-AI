@@ -1,70 +1,665 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SellUp AI | High-End Marketplace Management</title>
-    <meta name="description" content="Premium AI-powered tools for marketplace sellers. High-end automation and design studio.">
-    <link rel="stylesheet" href="style.css">
-    <!-- SF Pro Display Font Fallback -->
-    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/sf-pro-display">
-    <!-- Lucide Icons -->
+    <title>SellUp AI | Uzum Market Uchun AI Boshqaruvchi</title>
+    <meta name="description" content="SellUp AI — Uzum Market sotuvchilari uchun avtonom AI platforma. Unit Economics, SEO, FBS/FBO boshqaruv va bozor tahlili.">
+    <meta name="keywords" content="uzum market, sellup ai, marketplace, unit economics, fbs, uzbekistan, sotuvchi">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="apple-bg">
-    <div id="app">
-        <!-- Main Content Container -->
-        <main id="main-content" class="fade-in">
-            <!-- Hero Section -->
-            <section id="hero" class="hero-section">
-                <div class="hero-content">
-                    <div class="logo-container">
-                        <div class="apple-intelligence-logo">
-                            <span class="logo-s">S</span>
-                            <div class="neural-dot"></div>
-                        </div>
-                    </div>
-                    <h1 class="hero-title">Sotuvlaringizni <br><span class="ai-gradient-text">AI boshqaruviga</span> topshiring.</h1>
-                    <p class="hero-subtitle">SellUp AI – Marketplace boshqaruvining yangi davri.</p>
-                    <button class="apple-button glow-hover" id="start-btn">
-                        <span>Hoziroq boshlang</span>
-                    </button>
-                </div>
-            </section>
-        </main>
+<body>
 
-        <!-- MacOS Dock Navigation -->
-        <nav class="dock-container">
-            <div class="dock-glass">
-                <div class="dock-icon" data-tooltip="Home" onclick="navigateTo('hero')">
-                    <i data-lucide="home"></i>
-                </div>
-                <div class="dock-icon" data-tooltip="Studio" onclick="navigateTo('studio')">
-                    <i data-lucide="layout-template"></i>
-                </div>
-                <div class="dock-icon" data-tooltip="Smart Cards" onclick="navigateTo('seo')">
-                    <i data-lucide="sparkles"></i>
-                </div>
-                <div class="dock-icon" data-tooltip="Support" onclick="navigateTo('support')">
-                    <i data-lucide="message-circle"></i>
-                </div>
-                <div class="dock-divider"></div>
-                <div class="dock-icon" data-tooltip="Account" onclick="openAuth()">
-                    <i data-lucide="user"></i>
-                </div>
+    <!-- ====== COMMAND BAR (CMD+K) ====== -->
+    <div id="command-overlay" class="cmd-overlay hidden">
+        <div class="cmd-modal glass-card">
+            <div class="cmd-input-wrap">
+                <i data-lucide="search" class="cmd-search-icon"></i>
+                <input type="text" id="cmd-input" placeholder="Buyruq yoki sahifaga o'ting..." autocomplete="off">
+                <kbd class="cmd-kbd">ESC</kbd>
             </div>
-        </nav>
+            <div id="cmd-results" class="cmd-results"></div>
+        </div>
     </div>
 
-    <!-- Skeleton Loader Template (Hidden) -->
-    <template id="skeleton-template">
-        <div class="skeleton-screen">
-            <div class="skeleton-header"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
+    <!-- ====== MAIN APP CONTAINER ====== -->
+    <div id="app">
+
+        <!-- ====== LANDING / HERO ====== -->
+        <section id="page-hero" class="page active">
+            <div class="hero-section">
+                <!-- Animated Background Orbs -->
+                <div class="hero-orbs">
+                    <div class="orb orb-1"></div>
+                    <div class="orb orb-2"></div>
+                    <div class="orb orb-3"></div>
+                </div>
+
+                <div class="hero-content">
+                    <!-- Animated Logo -->
+                    <div class="logo-wrap animate-pop" style="animation-delay: 0.1s">
+                        <div class="sellup-logo">
+                            <span class="logo-letter">S</span>
+                            <div class="logo-neural-ring"></div>
+                            <div class="logo-spark spark-1"></div>
+                            <div class="logo-spark spark-2"></div>
+                            <div class="logo-spark spark-3"></div>
+                        </div>
+                    </div>
+
+                    <h1 class="hero-title animate-pop" style="animation-delay: 0.25s">
+                        Sotuvlaringizni<br>
+                        <span class="gradient-text">AI boshqaruviga</span> topshiring.
+                    </h1>
+
+                    <p class="hero-subtitle animate-pop" style="animation-delay: 0.4s">
+                        Uzum Market sotuvchilari uchun avtonom AI platforma. <br>
+                        Unit Economics, SEO, FBS/FBO va bozor tahlili — barchasi bitta joyda.
+                    </p>
+
+                    <div class="hero-actions animate-pop" style="animation-delay: 0.55s">
+                        <button class="btn-primary btn-glow" id="hero-start-btn" onclick="navigateTo('calculator')">
+                            <i data-lucide="zap"></i>
+                            <span>Hoziroq boshlang</span>
+                        </button>
+                        <button class="btn-secondary" onclick="navigateTo('studio')">
+                            <i data-lucide="play-circle"></i>
+                            <span>Demo ko'ring</span>
+                        </button>
+                    </div>
+
+                    <!-- Feature Pills -->
+                    <div class="hero-pills animate-pop" style="animation-delay: 0.7s">
+                        <div class="pill" onclick="navigateTo('calculator')">
+                            <i data-lucide="calculator"></i> Unit Economics
+                        </div>
+                        <div class="pill" onclick="navigateTo('studio')">
+                            <i data-lucide="palette"></i> AI Studio
+                        </div>
+                        <div class="pill" onclick="navigateTo('analytics')">
+                            <i data-lucide="bar-chart-3"></i> Bozor Tahlili
+                        </div>
+                        <div class="pill" onclick="navigateTo('fbs')">
+                            <i data-lucide="truck"></i> FBS / FBO
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating Stats Cards -->
+                <div class="floating-cards">
+                    <div class="float-card float-card-1 glass-card animate-float">
+                        <div class="float-card-icon" style="background: linear-gradient(135deg, #7B2FBE, #A855F7);">
+                            <i data-lucide="trending-up"></i>
+                        </div>
+                        <div>
+                            <div class="float-card-value counter" data-target="347">0</div>
+                            <div class="float-card-label">Faol sotuvchilar</div>
+                        </div>
+                    </div>
+                    <div class="float-card float-card-2 glass-card animate-float" style="animation-delay: 1s">
+                        <div class="float-card-icon" style="background: linear-gradient(135deg, #FF6B00, #FF9A3C);">
+                            <i data-lucide="package"></i>
+                        </div>
+                        <div>
+                            <div class="float-card-value counter" data-target="12480">0</div>
+                            <div class="float-card-label">Tahlil qilingan mahsulotlar</div>
+                        </div>
+                    </div>
+                    <div class="float-card float-card-3 glass-card animate-float" style="animation-delay: 2s">
+                        <div class="float-card-icon" style="background: linear-gradient(135deg, #10B981, #34D399);">
+                            <i data-lucide="wallet"></i>
+                        </div>
+                        <div>
+                            <div class="float-card-value">+28%</div>
+                            <div class="float-card-label">O'rtacha foyda o'sishi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== UNIT ECONOMICS CALCULATOR ====== -->
+        <section id="page-calculator" class="page">
+            <div class="page-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">
+                            <i data-lucide="calculator" class="page-title-icon"></i>
+                            Unit Economics Kalkulyatori
+                        </h1>
+                        <p class="page-desc">Mahsulotingiz rentabelligini aniq hisoblang. Narx, komissiya va logistikani kiritib, sof foydani bilib oling.</p>
+                    </div>
+                </div>
+
+                <div class="calc-grid">
+                    <!-- Input Panel -->
+                    <div class="calc-inputs glass-card">
+                        <h3 class="card-section-title">Kiritish ma'lumotlari</h3>
+
+                        <div class="input-group">
+                            <label for="calc-category">Kategoriya</label>
+                            <select id="calc-category" class="input-field">
+                                <option value="3">Aksessuarlar (3%)</option>
+                                <option value="5">Kiyim-kechak (5%)</option>
+                                <option value="7">Poyabzal (7%)</option>
+                                <option value="8">Bolalar mahsulotlari (8%)</option>
+                                <option value="10" selected>Elektronika (10%)</option>
+                                <option value="12">Uy-ro'zg'or (12%)</option>
+                                <option value="15">Go'zallik va salomatlik (15%)</option>
+                                <option value="18">Sport va dam olish (18%)</option>
+                                <option value="20">Oziq-ovqat (20%)</option>
+                                <option value="25">Kitoblar va o'quv (25%)</option>
+                                <option value="30">Bijouteriya (30%)</option>
+                                <option value="35">Boshqa (35%)</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="calc-price">Sotuv narxi (UZS)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="calc-price" class="input-field" value="150000" min="0">
+                                <span class="input-unit">so'm</span>
+                            </div>
+                            <input type="range" id="calc-price-range" min="1000" max="5000000" value="150000" class="range-slider">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="calc-cost">Tannarx (UZS)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="calc-cost" class="input-field" value="75000" min="0">
+                                <span class="input-unit">so'm</span>
+                            </div>
+                            <input type="range" id="calc-cost-range" min="0" max="5000000" value="75000" class="range-slider">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="calc-logistics">Yetkazish turi</label>
+                            <div class="logistics-options">
+                                <label class="radio-card active" data-logistics="mgt">
+                                    <input type="radio" name="logistics" value="mgt" checked>
+                                    <i data-lucide="building-2"></i>
+                                    <span class="radio-card-title">MGT</span>
+                                    <span class="radio-card-desc">Shahar ichida</span>
+                                </label>
+                                <label class="radio-card" data-logistics="ogt">
+                                    <input type="radio" name="logistics" value="ogt">
+                                    <i data-lucide="map-pin"></i>
+                                    <span class="radio-card-title">O'GT</span>
+                                    <span class="radio-card-desc">Viloyatlararo</span>
+                                </label>
+                                <label class="radio-card" data-logistics="ygt">
+                                    <input type="radio" name="logistics" value="ygt">
+                                    <i data-lucide="globe"></i>
+                                    <span class="radio-card-title">YGT</span>
+                                    <span class="radio-card-desc">Yagona tarif</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="input-group" id="mgt-tier-group">
+                            <label>MGT narx darajasi</label>
+                            <div class="logistics-options">
+                                <label class="radio-card small active" data-mgt="low">
+                                    <input type="radio" name="mgt-tier" value="2000" checked>
+                                    <span class="radio-card-title">< 10k</span>
+                                    <span class="radio-card-desc">2,000 so'm</span>
+                                </label>
+                                <label class="radio-card small" data-mgt="mid">
+                                    <input type="radio" name="mgt-tier" value="4000">
+                                    <span class="radio-card-title">10-99k</span>
+                                    <span class="radio-card-desc">4,000 so'm</span>
+                                </label>
+                                <label class="radio-card small" data-mgt="high">
+                                    <input type="radio" name="mgt-tier" value="6000">
+                                    <span class="radio-card-title">100k+</span>
+                                    <span class="radio-card-desc">6,000 so'm</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="calc-quantity">Oylik sotish hajmi (dona)</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="calc-quantity" class="input-field" value="50" min="1">
+                                <span class="input-unit">dona</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Panel -->
+                    <div class="calc-results">
+                        <!-- Main Result Card -->
+                        <div class="result-hero glass-card">
+                            <div class="result-hero-label">Sof foyda (1 dona)</div>
+                            <div class="result-hero-value" id="result-profit">0</div>
+                            <div class="result-hero-sub" id="result-profit-label">so'm</div>
+                            <div class="result-margin-bar">
+                                <div class="margin-fill" id="margin-fill"></div>
+                            </div>
+                            <div class="result-margin-text">Marja: <span id="result-margin">0</span>%</div>
+                        </div>
+
+                        <!-- Breakdown Cards -->
+                        <div class="result-cards-grid">
+                            <div class="result-card glass-card">
+                                <div class="result-card-icon" style="background: linear-gradient(135deg, #7B2FBE, #A855F7);">
+                                    <i data-lucide="percent"></i>
+                                </div>
+                                <div class="result-card-label">Komissiya</div>
+                                <div class="result-card-value" id="result-commission">0 so'm</div>
+                            </div>
+                            <div class="result-card glass-card">
+                                <div class="result-card-icon" style="background: linear-gradient(135deg, #FF6B00, #FF9A3C);">
+                                    <i data-lucide="truck"></i>
+                                </div>
+                                <div class="result-card-label">Logistika</div>
+                                <div class="result-card-value" id="result-logistics">0 so'm</div>
+                            </div>
+                            <div class="result-card glass-card">
+                                <div class="result-card-icon" style="background: linear-gradient(135deg, #10B981, #34D399);">
+                                    <i data-lucide="wallet"></i>
+                                </div>
+                                <div class="result-card-label">Oylik foyda</div>
+                                <div class="result-card-value" id="result-monthly">0 so'm</div>
+                            </div>
+                            <div class="result-card glass-card">
+                                <div class="result-card-icon" style="background: linear-gradient(135deg, #EF4444, #F87171);">
+                                    <i data-lucide="alert-triangle"></i>
+                                </div>
+                                <div class="result-card-label">Zarar chegarasi</div>
+                                <div class="result-card-value" id="result-breakeven">0 so'm</div>
+                            </div>
+                        </div>
+
+                        <!-- Profit Chart -->
+                        <div class="glass-card chart-card">
+                            <h3 class="card-section-title">Foyda taqsimoti</h3>
+                            <div class="donut-chart-wrap">
+                                <svg viewBox="0 0 200 200" class="donut-chart" id="profit-donut">
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="#F3E8FF" stroke-width="25"/>
+                                </svg>
+                                <div class="donut-center">
+                                    <span id="donut-center-text">0%</span>
+                                    <small>Marja</small>
+                                </div>
+                            </div>
+                            <div class="donut-legend" id="donut-legend"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== AI CONTENT STUDIO ====== -->
+        <section id="page-studio" class="page">
+            <div class="page-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">
+                            <i data-lucide="sparkles" class="page-title-icon"></i>
+                            AI Kontent Studio
+                        </h1>
+                        <p class="page-desc">Mahsulot rasmlarini yuklang. AI tahlil qiladi, SEO sarlavha va tavsif yaratadi, va Uzum talablariga muvofiqligini tekshiradi.</p>
+                    </div>
+                </div>
+
+                <div class="studio-grid">
+                    <!-- Upload Area -->
+                    <div class="studio-upload-area glass-card" id="upload-area">
+                        <div class="upload-placeholder" id="upload-placeholder">
+                            <div class="upload-icon-wrap bounce-in">
+                                <i data-lucide="cloud-upload"></i>
+                            </div>
+                            <h3>Mahsulot rasmini yuklang</h3>
+                            <p>Rasm tashlang yoki bosing. JPG, PNG, WebP</p>
+                            <input type="file" id="file-upload" accept="image/*" hidden>
+                            <button class="btn-primary" onclick="document.getElementById('file-upload').click()">
+                                <i data-lucide="upload"></i> Rasm tanlang
+                            </button>
+                        </div>
+                        <div class="upload-preview hidden" id="upload-preview">
+                            <img id="preview-image" alt="Preview">
+                            <div class="compliance-badges" id="compliance-badges"></div>
+                            <div class="infographic-overlays" id="infographic-overlays"></div>
+                        </div>
+                    </div>
+
+                    <!-- AI Analysis Panel -->
+                    <div class="studio-panel">
+                        <!-- Compliance Check -->
+                        <div class="glass-card studio-card">
+                            <div class="studio-card-header">
+                                <h3><i data-lucide="shield-check"></i> Muvofiqlik tekshiruvi</h3>
+                                <span class="status-badge" id="compliance-status">Kutilmoqda</span>
+                            </div>
+                            <div class="compliance-rules" id="compliance-rules">
+                                <div class="rule-item">
+                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
+                                    <span>Asosiy rasmda matn yo'q</span>
+                                </div>
+                                <div class="rule-item">
+                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
+                                    <span>Oq fon talabi</span>
+                                </div>
+                                <div class="rule-item">
+                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
+                                    <span>Rasm sifati (min 900x1200)</span>
+                                </div>
+                                <div class="rule-item">
+                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
+                                    <span>Logotip / vodyanoy belgi yo'q</span>
+                                </div>
+                                <div class="rule-item">
+                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
+                                    <span>3:4 nisbat (Uzum standarti)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEO Generator -->
+                        <div class="glass-card studio-card">
+                            <div class="studio-card-header">
+                                <h3><i data-lucide="type"></i> SEO Sarlavha va Tavsif</h3>
+                                <button class="btn-sm btn-primary" id="generate-seo-btn" disabled onclick="generateSEO()">
+                                    <i data-lucide="wand-2"></i> Yaratish
+                                </button>
+                            </div>
+                            <div class="seo-output" id="seo-output">
+                                <div class="seo-placeholder">
+                                    <i data-lucide="file-text"></i>
+                                    <p>Rasm yuklanganidan keyin AI sarlavha va tavsif yaratadi</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infographic Options -->
+                        <div class="glass-card studio-card">
+                            <div class="studio-card-header">
+                                <h3><i data-lucide="layers"></i> Infografika qo'shish</h3>
+                            </div>
+                            <div class="infographic-options">
+                                <label class="infographic-toggle">
+                                    <input type="checkbox" id="toggle-delivery" onchange="updateOverlays()">
+                                    <span class="toggle-slider"></span>
+                                    <span><i data-lucide="truck"></i> Yetkazish muddati</span>
+                                </label>
+                                <label class="infographic-toggle">
+                                    <input type="checkbox" id="toggle-warranty" onchange="updateOverlays()">
+                                    <span class="toggle-slider"></span>
+                                    <span><i data-lucide="shield"></i> Kafolat</span>
+                                </label>
+                                <label class="infographic-toggle">
+                                    <input type="checkbox" id="toggle-free-delivery" onchange="updateOverlays()">
+                                    <span class="toggle-slider"></span>
+                                    <span><i data-lucide="gift"></i> Bepul yetkazish</span>
+                                </label>
+                                <label class="infographic-toggle">
+                                    <input type="checkbox" id="toggle-rating" onchange="updateOverlays()">
+                                    <span class="toggle-slider"></span>
+                                    <span><i data-lucide="star"></i> Reyting ko'rsatish</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== MARKET INTELLIGENCE ====== -->
+        <section id="page-analytics" class="page">
+            <div class="page-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">
+                            <i data-lucide="bar-chart-3" class="page-title-icon"></i>
+                            Bozor Tahlili
+                        </h1>
+                        <p class="page-desc">Uzum Market'dagi eng daromadli va kam raqobatli nishalarni aniqlang.</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-secondary btn-sm" onclick="refreshAnalytics()">
+                            <i data-lucide="refresh-cw"></i> Yangilash
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Row -->
+                <div class="kpi-row">
+                    <div class="kpi-card glass-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #7B2FBE, #A855F7);">
+                            <i data-lucide="eye"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <div class="kpi-value counter" data-target="1240">0</div>
+                            <div class="kpi-label">Tahlil qilingan nishalar</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10B981, #34D399);">
+                            <i data-lucide="target"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <div class="kpi-value counter" data-target="48">0</div>
+                            <div class="kpi-label">Imkoniyatlar topildi</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #FF6B00, #FF9A3C);">
+                            <i data-lucide="flame"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <div class="kpi-value counter" data-target="15">0</div>
+                            <div class="kpi-label">Trend kategoriyalar</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #EC4899, #F472B6);">
+                            <i data-lucide="crown"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <div class="kpi-value counter" data-target="92">0</div>
+                            <div class="kpi-label">AI aniqlik balli (%)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <!-- Niche Opportunities -->
+                    <div class="glass-card analytics-main">
+                        <h3 class="card-section-title">
+                            <i data-lucide="target"></i> Kam raqobat / Yuqori talab nishalar
+                        </h3>
+                        <div class="niche-list" id="niche-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Category Trend Chart -->
+                    <div class="glass-card">
+                        <h3 class="card-section-title">
+                            <i data-lucide="trending-up"></i> Kategoriya trendlari
+                        </h3>
+                        <div class="bar-chart" id="category-chart">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Competitor Cards -->
+                    <div class="glass-card" style="grid-column: 1 / -1;">
+                        <h3 class="card-section-title">
+                            <i data-lucide="users"></i> Raqobatchilar tahlili
+                        </h3>
+                        <div class="competitor-grid" id="competitor-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== FBS/FBO OPERATIONS ====== -->
+        <section id="page-fbs" class="page">
+            <div class="page-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">
+                            <i data-lucide="package" class="page-title-icon"></i>
+                            FBS / FBO Boshqaruv Paneli
+                        </h1>
+                        <p class="page-desc">Buyurtmalar holatini kuzating. Yangi → Yig'ilmoqda → Yetkazilmoqda → Yetkazildi.</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-primary btn-sm" onclick="addNewOrder()">
+                            <i data-lucide="plus"></i> Yangi buyurtma
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FBS Status Summary -->
+                <div class="fbs-summary">
+                    <div class="fbs-stat glass-card">
+                        <div class="fbs-stat-dot" style="background: #7B2FBE;"></div>
+                        <div class="fbs-stat-value" id="fbs-new-count">5</div>
+                        <div class="fbs-stat-label">Yangi</div>
+                    </div>
+                    <div class="fbs-stat glass-card">
+                        <div class="fbs-stat-dot" style="background: #FF6B00;"></div>
+                        <div class="fbs-stat-value" id="fbs-assembly-count">3</div>
+                        <div class="fbs-stat-label">Yig'ilmoqda</div>
+                    </div>
+                    <div class="fbs-stat glass-card">
+                        <div class="fbs-stat-dot" style="background: #3B82F6;"></div>
+                        <div class="fbs-stat-value" id="fbs-delivering-count">4</div>
+                        <div class="fbs-stat-label">Yetkazilmoqda</div>
+                    </div>
+                    <div class="fbs-stat glass-card">
+                        <div class="fbs-stat-dot" style="background: #10B981;"></div>
+                        <div class="fbs-stat-value" id="fbs-delivered-count">8</div>
+                        <div class="fbs-stat-label">Yetkazildi</div>
+                    </div>
+                </div>
+
+                <!-- Kanban Board -->
+                <div class="kanban-board">
+                    <div class="kanban-column" data-status="new">
+                        <div class="kanban-column-header">
+                            <div class="kanban-dot" style="background: #7B2FBE;"></div>
+                            <span>Yangi</span>
+                            <span class="kanban-count" id="kanban-new-count">5</span>
+                        </div>
+                        <div class="kanban-cards" id="kanban-new"></div>
+                    </div>
+                    <div class="kanban-column" data-status="assembly">
+                        <div class="kanban-column-header">
+                            <div class="kanban-dot" style="background: #FF6B00;"></div>
+                            <span>Yig'ilmoqda</span>
+                            <span class="kanban-count" id="kanban-assembly-count">3</span>
+                        </div>
+                        <div class="kanban-cards" id="kanban-assembly"></div>
+                    </div>
+                    <div class="kanban-column" data-status="delivering">
+                        <div class="kanban-column-header">
+                            <div class="kanban-dot" style="background: #3B82F6;"></div>
+                            <span>Yetkazilmoqda</span>
+                            <span class="kanban-count" id="kanban-delivering-count">4</span>
+                        </div>
+                        <div class="kanban-cards" id="kanban-delivering"></div>
+                    </div>
+                    <div class="kanban-column" data-status="delivered">
+                        <div class="kanban-column-header">
+                            <div class="kanban-dot" style="background: #10B981;"></div>
+                            <span>Yetkazildi</span>
+                            <span class="kanban-count" id="kanban-delivered-count">8</span>
+                        </div>
+                        <div class="kanban-cards" id="kanban-delivered"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== AI SUPPORT CHAT ====== -->
+        <section id="page-support" class="page">
+            <div class="page-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">
+                            <i data-lucide="message-circle" class="page-title-icon"></i>
+                            AI Yordamchi
+                        </h1>
+                        <p class="page-desc">Savollaringizni bering — AI yordamchi sizga yordam beradi.</p>
+                    </div>
+                </div>
+
+                <div class="chat-container glass-card">
+                    <div class="chat-header-bar">
+                        <div class="chat-avatar">
+                            <i data-lucide="bot"></i>
+                        </div>
+                        <div>
+                            <div class="chat-name">SellUp AI Assistant</div>
+                            <div class="chat-status"><span class="online-dot"></span> Online</div>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-bubble incoming">Assalomu alaykum! 👋 Men SellUp AI yordamchisiman.</div>
+                        <div class="chat-bubble incoming">Uzum Market bo'yicha savollaringizga javob beraman. Unit Economics, FBS, mahsulot optimallashtirish — har qanday savol bering!</div>
+                    </div>
+                    <div class="chat-input-bar">
+                        <button class="chat-attach-btn"><i data-lucide="paperclip"></i></button>
+                        <input type="text" id="chat-input" placeholder="Xabar yozing..." autocomplete="off">
+                        <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">
+                            <i data-lucide="send"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ====== BOTTOM DOCK NAVIGATION ====== -->
+    <nav class="dock-nav" id="dock-nav">
+        <div class="dock-bar glass-card">
+            <div class="dock-item active" data-page="hero" onclick="navigateTo('hero')">
+                <i data-lucide="home"></i>
+                <span class="dock-label">Bosh sahifa</span>
+            </div>
+            <div class="dock-item" data-page="calculator" onclick="navigateTo('calculator')">
+                <i data-lucide="calculator"></i>
+                <span class="dock-label">Kalkulyator</span>
+            </div>
+            <div class="dock-item" data-page="studio" onclick="navigateTo('studio')">
+                <i data-lucide="sparkles"></i>
+                <span class="dock-label">Studio</span>
+            </div>
+            <div class="dock-item" data-page="analytics" onclick="navigateTo('analytics')">
+                <i data-lucide="bar-chart-3"></i>
+                <span class="dock-label">Tahlil</span>
+            </div>
+            <div class="dock-item" data-page="fbs" onclick="navigateTo('fbs')">
+                <i data-lucide="package"></i>
+                <span class="dock-label">FBS</span>
+            </div>
+            <div class="dock-item" data-page="support" onclick="navigateTo('support')">
+                <i data-lucide="message-circle"></i>
+                <span class="dock-label">Yordam</span>
+            </div>
         </div>
-    </template>
+    </nav>
+
+    <!-- CMD+K hint -->
+    <div class="cmd-hint" id="cmd-hint">
+        <kbd>Ctrl</kbd> + <kbd>K</kbd> — Tezkor buyruqlar
+    </div>
 
     <script src="app.js"></script>
 </body>
