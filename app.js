@@ -1,6 +1,12 @@
 /**
  * SellUp AI — Main Application Logic
- * Modules: Unit Economics, AI Studio, Market Intelligence, FBS/FBO, Chat, CMD+K
+ * Modules: Komissiya Kalkulyatori, Unit Iqtisodiyoti, AI Studio, Market Intelligence, FBS/FBO, Chat, CMD+K
+ * 
+ * Rasmiy ma'lumotlar manbalari:
+ * - Logistika sbori: 06.10.2025 dan - KGT: 5000, O'GT: 8000, YGT: 20000
+ * - Komissiya: Uzum Market rasmiy spreadsheet (kategoriya bo'yicha 5%-30%)
+ * - FBS qoidalari: seller.uzum.uz/manual/
+ * - Rasm talablari: seller.uzum.uz/manual/5.product-creation/
  */
 
 // ============================================
@@ -10,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     initNavigation();
     initCommandBar();
-    initCalculator();
+    initKommissiyaCalc();
+    initUnitEconomics();
     initStudio();
     initAnalytics();
     initFBS();
@@ -27,41 +34,33 @@ function navigateTo(pageId) {
     const pages = document.querySelectorAll('.page');
     const dockItems = document.querySelectorAll('.dock-item');
 
-    // Hide all pages
     pages.forEach(p => p.classList.remove('active'));
 
-    // Show target
     const target = document.getElementById(`page-${pageId}`);
     if (target) {
         target.classList.add('active');
         currentPage = pageId;
 
-        // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // Update dock
         dockItems.forEach(d => {
             d.classList.toggle('active', d.dataset.page === pageId);
         });
 
-        // Reinitialize icons
         setTimeout(() => lucide.createIcons(), 50);
 
-        // Trigger page-specific init
-        if (pageId === 'calculator') calculateUnitEconomics();
+        if (pageId === 'kommissiya') calculateKommissiya();
+        if (pageId === 'unit') calculateUnitEconomics();
         if (pageId === 'analytics') animateCharts();
         if (pageId === 'fbs') renderKanban();
 
-        // Re-count animations
         initCounters();
     }
 
-    // Close command bar if open
     closeCommandBar();
 }
 
 function initNavigation() {
-    // Dock magnification effect
     const dockBar = document.querySelector('.dock-bar');
     const dockItems = document.querySelectorAll('.dock-item');
 
@@ -94,32 +93,29 @@ function initNavigation() {
 // ============================================
 const commandActions = [
     { name: 'Bosh sahifa', icon: 'home', action: () => navigateTo('hero'), shortcut: '1' },
-    { name: 'Unit Economics Kalkulyatori', icon: 'calculator', action: () => navigateTo('calculator'), shortcut: '2' },
-    { name: 'AI Kontent Studio', icon: 'sparkles', action: () => navigateTo('studio'), shortcut: '3' },
-    { name: 'Bozor Tahlili', icon: 'bar-chart-3', action: () => navigateTo('analytics'), shortcut: '4' },
-    { name: 'FBS / FBO Boshqaruv', icon: 'package', action: () => navigateTo('fbs'), shortcut: '5' },
-    { name: 'AI Yordamchi', icon: 'message-circle', action: () => navigateTo('support'), shortcut: '6' },
+    { name: 'Komissiya Kalkulyatori', icon: 'calculator', action: () => navigateTo('kommissiya'), shortcut: '2' },
+    { name: 'Unit Iqtisodiyoti', icon: 'trending-up', action: () => navigateTo('unit'), shortcut: '3' },
+    { name: 'AI Kontent Studio', icon: 'sparkles', action: () => navigateTo('studio'), shortcut: '4' },
+    { name: 'Bozor Tahlili', icon: 'bar-chart-3', action: () => navigateTo('analytics'), shortcut: '5' },
+    { name: 'FBS / FBO Boshqaruv', icon: 'package', action: () => navigateTo('fbs'), shortcut: '6' },
+    { name: 'AI Yordamchi', icon: 'message-circle', action: () => navigateTo('support'), shortcut: '7' },
     { name: 'Yangi buyurtma qo\'shish', icon: 'plus-circle', action: () => { navigateTo('fbs'); setTimeout(addNewOrder, 500); } },
-    { name: 'Foydani hisoblash', icon: 'trending-up', action: () => navigateTo('calculator') },
-    { name: 'Rasm yuklash', icon: 'upload', action: () => { navigateTo('studio'); } },
+    { name: 'Foydani hisoblash', icon: 'wallet', action: () => navigateTo('unit') },
+    { name: 'Komissiya hisoblash', icon: 'percent', action: () => navigateTo('kommissiya') },
+    { name: 'Rasm yuklash', icon: 'upload', action: () => navigateTo('studio') },
 ];
 
 let highlightedIndex = 0;
 
 function initCommandBar() {
     document.addEventListener('keydown', (e) => {
-        // Ctrl+K or Cmd+K
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
             toggleCommandBar();
         }
-
-        // Escape
         if (e.key === 'Escape') {
             closeCommandBar();
         }
-
-        // Navigate with arrow keys in command bar
         const overlay = document.getElementById('command-overlay');
         if (!overlay.classList.contains('hidden')) {
             if (e.key === 'ArrowDown') {
@@ -140,7 +136,6 @@ function initCommandBar() {
         }
     });
 
-    // Search filter
     const cmdInput = document.getElementById('cmd-input');
     if (cmdInput) {
         cmdInput.addEventListener('input', (e) => {
@@ -148,7 +143,6 @@ function initCommandBar() {
         });
     }
 
-    // Click outside to close
     const overlay = document.getElementById('command-overlay');
     if (overlay) {
         overlay.addEventListener('click', (e) => {
@@ -207,14 +201,92 @@ function updateHighlight() {
 }
 
 // ============================================
-// UNIT ECONOMICS CALCULATOR
+// KOMISSIYA KALKULYATORI (Alohida bo'lim)
+// Rasmiy Uzum Market ma'lumotlari
+// Logistika: KGT=5000, O'GT=8000, YGT=20000 (06.10.2025 dan)
 // ============================================
-function initCalculator() {
-    // Sync range sliders with inputs
-    const priceInput = document.getElementById('calc-price');
-    const priceRange = document.getElementById('calc-price-range');
-    const costInput = document.getElementById('calc-cost');
-    const costRange = document.getElementById('calc-cost-range');
+function initKommissiyaCalc() {
+    const priceInput = document.getElementById('komm-price');
+    const priceRange = document.getElementById('komm-price-range');
+
+    if (priceInput && priceRange) {
+        priceInput.addEventListener('input', () => {
+            priceRange.value = priceInput.value;
+            calculateKommissiya();
+        });
+        priceRange.addEventListener('input', () => {
+            priceInput.value = priceRange.value;
+            calculateKommissiya();
+        });
+    }
+
+    const categorySelect = document.getElementById('komm-category');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', calculateKommissiya);
+    }
+
+    const quantityInput = document.getElementById('komm-quantity');
+    if (quantityInput) {
+        quantityInput.addEventListener('input', calculateKommissiya);
+    }
+
+    // Logistics radio cards for Kommissiya
+    document.querySelectorAll('.radio-card[data-logistics]').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.radio-card[data-logistics]').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            card.querySelector('input').checked = true;
+            calculateKommissiya();
+        });
+    });
+}
+
+function calculateKommissiya() {
+    const price = parseFloat(document.getElementById('komm-price')?.value) || 0;
+    const commissionRate = parseFloat(document.getElementById('komm-category')?.value) || 12;
+    const quantity = parseInt(document.getElementById('komm-quantity')?.value) || 1;
+
+    // Get logistics cost from radio
+    const logisticsCost = parseFloat(document.querySelector('input[name="komm-logistics"]:checked')?.value) || 5000;
+
+    // Calculate
+    const commission = price * (commissionRate / 100);
+    const totalFee = commission + logisticsCost;
+    const netToSeller = price - totalFee;
+    const totalQty = netToSeller * quantity;
+
+    // Update UI
+    const totalFeeEl = document.getElementById('komm-total-fee');
+    if (totalFeeEl) {
+        totalFeeEl.textContent = formatNumber(Math.round(totalFee));
+        totalFeeEl.style.color = totalFee > 0 ? '#FF6B6B' : 'white';
+    }
+
+    const commissionEl = document.getElementById('komm-commission');
+    if (commissionEl) commissionEl.textContent = formatNumber(Math.round(commission)) + ' so\'m';
+
+    const logisticsEl = document.getElementById('komm-logistics');
+    if (logisticsEl) logisticsEl.textContent = formatNumber(logisticsCost) + ' so\'m';
+
+    const netEl = document.getElementById('komm-net');
+    if (netEl) {
+        netEl.textContent = formatNumber(Math.round(netToSeller)) + ' so\'m';
+        netEl.style.color = netToSeller >= 0 ? '#10B981' : '#EF4444';
+    }
+
+    const totalQtyEl = document.getElementById('komm-total-qty');
+    if (totalQtyEl) totalQtyEl.textContent = formatNumber(Math.round(totalQty)) + ' so\'m';
+}
+
+// ============================================
+// UNIT IQTISODIYOTI (Alohida bo'lim)
+// To'liq foyda-zarar hisob-kitobi
+// ============================================
+function initUnitEconomics() {
+    const priceInput = document.getElementById('unit-price');
+    const priceRange = document.getElementById('unit-price-range');
+    const costInput = document.getElementById('unit-cost');
+    const costRange = document.getElementById('unit-cost-range');
 
     if (priceInput && priceRange) {
         priceInput.addEventListener('input', () => {
@@ -238,40 +310,20 @@ function initCalculator() {
         });
     }
 
-    // Category change
-    const categorySelect = document.getElementById('calc-category');
+    const categorySelect = document.getElementById('unit-category');
     if (categorySelect) {
         categorySelect.addEventListener('change', calculateUnitEconomics);
     }
 
-    // Quantity change
-    const quantityInput = document.getElementById('calc-quantity');
+    const quantityInput = document.getElementById('unit-quantity');
     if (quantityInput) {
         quantityInput.addEventListener('input', calculateUnitEconomics);
     }
 
-    // Logistics radio cards
-    document.querySelectorAll('.radio-card[data-logistics]').forEach(card => {
+    // Logistics radio cards for Unit Economics
+    document.querySelectorAll('.radio-card[data-unit-logistics]').forEach(card => {
         card.addEventListener('click', () => {
-            document.querySelectorAll('.radio-card[data-logistics]').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-            card.querySelector('input').checked = true;
-
-            // Show/hide MGT tier
-            const mgtGroup = document.getElementById('mgt-tier-group');
-            if (card.dataset.logistics === 'mgt') {
-                mgtGroup.style.display = 'block';
-            } else {
-                mgtGroup.style.display = 'none';
-            }
-            calculateUnitEconomics();
-        });
-    });
-
-    // MGT tier radio cards
-    document.querySelectorAll('.radio-card[data-mgt]').forEach(card => {
-        card.addEventListener('click', () => {
-            document.querySelectorAll('.radio-card[data-mgt]').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.radio-card[data-unit-logistics]').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
             card.querySelector('input').checked = true;
             calculateUnitEconomics();
@@ -280,61 +332,63 @@ function initCalculator() {
 }
 
 function calculateUnitEconomics() {
-    const price = parseFloat(document.getElementById('calc-price')?.value) || 0;
-    const cost = parseFloat(document.getElementById('calc-cost')?.value) || 0;
-    const commissionRate = parseFloat(document.getElementById('calc-category')?.value) || 10;
-    const quantity = parseInt(document.getElementById('calc-quantity')?.value) || 1;
+    const price = parseFloat(document.getElementById('unit-price')?.value) || 0;
+    const cost = parseFloat(document.getElementById('unit-cost')?.value) || 0;
+    const commissionRate = parseFloat(document.getElementById('unit-category')?.value) || 12;
+    const quantity = parseInt(document.getElementById('unit-quantity')?.value) || 1;
 
-    // Get logistics cost
-    let logisticsCost = 0;
-    const logisticsType = document.querySelector('input[name="logistics"]:checked')?.value;
+    // Rasmiy logistika narxlari (06.10.2025 dan)
+    const logisticsCost = parseFloat(document.querySelector('input[name="unit-logistics"]:checked')?.value) || 5000;
 
-    if (logisticsType === 'mgt') {
-        logisticsCost = parseFloat(document.querySelector('input[name="mgt-tier"]:checked')?.value) || 2000;
-    } else if (logisticsType === 'ogt') {
-        logisticsCost = 8000;
-    } else if (logisticsType === 'ygt') {
-        logisticsCost = 20000;
-    }
-
-    // Calculate
+    // Hisoblash
     const commission = price * (commissionRate / 100);
     const totalExpenses = cost + commission + logisticsCost;
     const profit = price - totalExpenses;
     const margin = price > 0 ? (profit / price) * 100 : 0;
     const monthlyProfit = profit * quantity;
 
-    // Break-even price (where profit = 0)
-    const breakeven = cost + logisticsCost + (cost + logisticsCost) * (commissionRate / (100 - commissionRate));
+    // Zarar chegarasi — minimal sotuv narxi (foyda = 0 bo'ladigan nuqta)
+    // narx = tannarx + komissiya(narx) + logistika
+    // narx = cost + (narx * rate/100) + logistika
+    // narx - narx*rate/100 = cost + logistika
+    // narx(1 - rate/100) = cost + logistika
+    // narx = (cost + logistika) / (1 - rate/100)
+    const breakeven = (cost + logisticsCost) / (1 - commissionRate / 100);
 
-    // Update UI
-    const profitEl = document.getElementById('result-profit');
+    // UI yangilash
+    const profitEl = document.getElementById('unit-profit');
     if (profitEl) {
         profitEl.textContent = formatNumber(Math.round(profit));
         profitEl.style.color = profit >= 0 ? 'white' : '#FF6B6B';
     }
 
-    const marginFill = document.getElementById('margin-fill');
+    const marginFill = document.getElementById('unit-margin-fill');
     if (marginFill) {
         marginFill.style.width = `${Math.max(0, Math.min(100, margin))}%`;
+        marginFill.style.background = margin >= 20 ? 'linear-gradient(90deg, #10B981, #34D399)' :
+                                       margin >= 10 ? 'linear-gradient(90deg, #F59E0B, #FBBF24)' :
+                                       'linear-gradient(90deg, #EF4444, #F87171)';
     }
 
-    const marginText = document.getElementById('result-margin');
+    const marginText = document.getElementById('unit-margin');
     if (marginText) marginText.textContent = margin.toFixed(1);
 
-    const commissionEl = document.getElementById('result-commission');
+    const commissionEl = document.getElementById('unit-commission');
     if (commissionEl) commissionEl.textContent = formatNumber(Math.round(commission)) + ' so\'m';
 
-    const logisticsEl = document.getElementById('result-logistics');
+    const logisticsEl = document.getElementById('unit-logistics');
     if (logisticsEl) logisticsEl.textContent = formatNumber(logisticsCost) + ' so\'m';
 
-    const monthlyEl = document.getElementById('result-monthly');
-    if (monthlyEl) monthlyEl.textContent = formatNumber(Math.round(monthlyProfit)) + ' so\'m';
+    const monthlyEl = document.getElementById('unit-monthly');
+    if (monthlyEl) {
+        monthlyEl.textContent = formatNumber(Math.round(monthlyProfit)) + ' so\'m';
+        monthlyEl.style.color = monthlyProfit >= 0 ? '#10B981' : '#EF4444';
+    }
 
-    const breakevenEl = document.getElementById('result-breakeven');
+    const breakevenEl = document.getElementById('unit-breakeven');
     if (breakevenEl) breakevenEl.textContent = formatNumber(Math.round(breakeven)) + ' so\'m';
 
-    // Update donut chart
+    // Donut chart yangilash
     updateDonutChart(cost, commission, logisticsCost, profit, price);
 }
 
@@ -362,7 +416,6 @@ function updateDonutChart(cost, commission, logistics, profit, total) {
 
     segments.forEach(seg => {
         const dashArray = (seg.percent / 100) * circumference;
-        const dashOffset = circumference - dashArray;
         const rotation = (offset / 100) * 360 - 90;
 
         html += `<circle cx="100" cy="100" r="${radius}" fill="none" 
@@ -375,11 +428,9 @@ function updateDonutChart(cost, commission, logistics, profit, total) {
 
     svg.innerHTML = html;
 
-    // Center text
     const centerText = document.getElementById('donut-center-text');
     if (centerText) centerText.textContent = `${Math.max(0, profitPercent).toFixed(0)}%`;
 
-    // Legend
     const legend = document.getElementById('donut-legend');
     if (legend) {
         legend.innerHTML = segments.map(s => `
@@ -393,6 +444,7 @@ function updateDonutChart(cost, commission, logistics, profit, total) {
 
 // ============================================
 // AI CONTENT STUDIO
+// Rasmiy Uzum Market rasm talablari (5.7 bo'lim)
 // ============================================
 let uploadedImage = null;
 
@@ -402,7 +454,6 @@ function initStudio() {
 
     if (!uploadArea || !fileInput) return;
 
-    // Drag & Drop
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.classList.add('dragover');
@@ -421,7 +472,6 @@ function initStudio() {
         }
     });
 
-    // File input
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) handleImageUpload(file);
@@ -433,7 +483,6 @@ function handleImageUpload(file) {
     reader.onload = (e) => {
         uploadedImage = e.target.result;
 
-        // Show preview with WOW bounce animation
         const placeholder = document.getElementById('upload-placeholder');
         const preview = document.getElementById('upload-preview');
         const previewImage = document.getElementById('preview-image');
@@ -444,27 +493,40 @@ function handleImageUpload(file) {
             previewImage.src = uploadedImage;
         }
 
-        // Enable SEO button
         const seoBtn = document.getElementById('generate-seo-btn');
         if (seoBtn) seoBtn.disabled = false;
 
-        // Run compliance check with animation
         setTimeout(runComplianceCheck, 500);
     };
     reader.readAsDataURL(file);
 }
 
+/**
+ * Rasmiy Uzum Market rasm/infografika tekshiruvi
+ * Manba: seller.uzum.uz/manual/5.product-creation/#_5-7
+ * 
+ * Qoidalar:
+ * 1) Tovar rasmda 50%+ joy egallashi kerak
+ * 2) Yuqori aniqlik — loyqa, shovqinli rasmlar taqiqlangan
+ * 3) Och, bir xil fon tavsiya etiladi (oshxona/uy foni bo'lmasligi kerak)
+ * 4) Begona narsalar, insonlar aks etmasligi kerak
+ * 5) Infografikada stop-so'zlar taqiqlangan (#1, Eng yaxshi, Top va h.k.)
+ * 6) Matn faqat o'zbek yoki rus tilida
+ * 7) AI yaratilgan aldamchi rasmlar taqiqlangan
+ */
 function runComplianceCheck() {
     const rules = document.querySelectorAll('#compliance-rules .rule-item');
     const statusBadge = document.getElementById('compliance-status');
 
-    // Simulate AI analysis with staggered animations
+    // Uzum rasmiy talablari bo'yicha AI simulyatsiyasi
     const results = [
-        { pass: true },   // No text on main image
-        { pass: Math.random() > 0.3 },  // White background
-        { pass: Math.random() > 0.5 },  // Image quality
-        { pass: true },   // No watermark
-        { pass: Math.random() > 0.4 },  // 3:4 ratio
+        { pass: true },                    // Tovar 50%+ kadr egallaydi
+        { pass: Math.random() > 0.3 },     // Yuqori aniqlik
+        { pass: Math.random() > 0.25 },    // Och fon
+        { pass: true },                    // Begona narsalar yo'q
+        { pass: Math.random() > 0.4 },     // Stop-so'zlar yo'q
+        { pass: true },                    // Til — UZ/RU
+        { pass: true },                    // AI aldamchi rasm emas
     ];
 
     let passCount = 0;
@@ -485,12 +547,11 @@ function runComplianceCheck() {
 
             lucide.createIcons();
 
-            // Update status badge after all checks
             if (i === rules.length - 1) {
                 if (passCount === rules.length) {
                     statusBadge.textContent = 'Muvofiq ✓';
                     statusBadge.className = 'status-badge pass';
-                } else if (passCount >= 3) {
+                } else if (passCount >= 5) {
                     statusBadge.textContent = 'Qisman muvofiq';
                     statusBadge.className = 'status-badge warning';
                 } else {
@@ -498,7 +559,6 @@ function runComplianceCheck() {
                     statusBadge.className = 'status-badge fail';
                 }
 
-                // Update image badges
                 updateComplianceBadges(passCount, rules.length);
             }
         }, (i + 1) * 400);
@@ -520,11 +580,18 @@ function updateComplianceBadges(passCount, totalCount) {
     lucide.createIcons();
 }
 
+/**
+ * SEO Sarlavha va Tavsif yaratish
+ * Uzum qoidalari (5.3 bo'lim):
+ * - Sarlavha: Tovar turi + brend + model + xususiyat
+ * - Kamida 3 so'z
+ * - UZ va RU da to'ldirilishi kerak
+ * - Stop-so'zlar taqiqlangan (eng yaxshi, #1, top va h.k.)
+ */
 function generateSEO() {
     const output = document.getElementById('seo-output');
     if (!output) return;
 
-    // Show loading
     output.innerHTML = `
         <div style="text-align: center; padding: 20px;">
             <div class="typing-dot" style="display: inline-block; margin: 0 2px; width: 8px; height: 8px; background: var(--violet-500); border-radius: 50%; animation: typingBounce 1.4s infinite;"></div>
@@ -534,69 +601,56 @@ function generateSEO() {
         </div>
     `;
 
-    // Simulate AI generation
     setTimeout(() => {
-        const titles = [
-            "Premium sifatli mahsulot | Tez yetkazish | Kafolat bilan",
-            "Yangi kolleksiya | Eng arzon narx | Sifat kafolati",
-            "Original mahsulot | Bepul yetkazish | 30 kun kafolat",
+        const titles_uz = [
+            "Bluetooth quloqchin simsiz TWS Pro sifatli stereo ovoz",
+            "Smartfon uchun himoya qoplamasi shaffof silikon antiudar",
+            "LED stol chirog'i o'qish uchun 3 rejimli yorug'lik",
         ];
-
+        const titles_ru = [
+            "Bluetooth наушники беспроводные TWS Pro качественный стерео звук",
+            "Защитный чехол для смартфона прозрачный силикон противоударный",
+            "LED настольная лампа для чтения 3 режима освещения",
+        ];
         const descriptions = [
-            "Yuqori sifatli materialdan tayyorlangan. O'zbekiston bo'ylab tez yetkazish. 30 kunlik qaytarish kafolati. Uzum Market rasmiy sotuvchisi. Barcha ranglar va o'lchamlar mavjud.",
-            "Premium sifat — har bir buyurtma sinchiklab tekshiriladi. 1-3 kun ichida yetkazish. Arzon narx va ishonchli xizmat. Buyurtma bering — afzalliklarni his qiling!",
-            "Mahsulot tavsifi: Original, sifatli, bardoshli. Tez yetkazish xizmati mavjud. Murojaat qilganingizda qo'shimcha chegirmalar. Bizning do'konda eng yaxshi takliflar!",
+            "Yuqori sifatli materialdan tayyorlangan. O'zbekiston bo'ylab 1-3 kun ichida yetkazish. 30 kunlik qaytarish kafolati. Barcha ranglar va o'lchamlar mavjud.",
+            "Premium sifat — har bir buyurtma sinchiklab tekshiriladi. Tez yetkazish xizmati. Arzon narx va ishonchli xizmat. Buyurtma bering!",
+            "Original mahsulot, sifatli va bardoshli. Tez yetkazish xizmati mavjud. Barcha savollarga javob beramiz.",
         ];
 
-        const randomIdx = Math.floor(Math.random() * titles.length);
+        const idx = Math.floor(Math.random() * titles_uz.length);
 
         output.innerHTML = `
             <div class="seo-result">
                 <div class="seo-result-block">
-                    <label>SEO Sarlavha (UZ)</label>
-                    <p>${titles[randomIdx]}</p>
+                    <label>📝 Sarlavha (O'zbekcha)</label>
+                    <p>${titles_uz[idx]}</p>
                 </div>
                 <div class="seo-result-block">
-                    <label>Tavsif (UZ)</label>
-                    <p>${descriptions[randomIdx]}</p>
+                    <label>📝 Sarlavha (Ruscha)</label>
+                    <p>${titles_ru[idx]}</p>
                 </div>
                 <div class="seo-result-block">
-                    <label>Kalit so'zlar</label>
+                    <label>📄 Tavsif (O'zbekcha)</label>
+                    <p>${descriptions[idx]}</p>
+                </div>
+                <div class="seo-result-block">
+                    <label>🏷️ Kalit so'zlar</label>
                     <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
-                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">premium</span>
                         <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">sifatli</span>
-                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">arzon</span>
-                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">yangi</span>
+                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">original</span>
                         <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">kafolatli</span>
+                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">arzon narx</span>
                         <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">tez yetkazish</span>
                     </div>
+                </div>
+                <div class="seo-result-block" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 12px;">
+                    <label style="color: #EF4444;">⚠️ Taqiqlangan so'zlar (Uzum qoidasi 5.1)</label>
+                    <p style="font-size: 0.8rem; color: var(--text-tertiary);">Eng yaxshi, #1, Top, Premium sifat, Arzon narx garantiya, Official, Rasmiy diler — bu so'zlarni ISHLATMANG!</p>
                 </div>
             </div>
         `;
     }, 2000);
-}
-
-function updateOverlays() {
-    const container = document.getElementById('infographic-overlays');
-    if (!container || !uploadedImage) return;
-
-    let html = '';
-
-    if (document.getElementById('toggle-delivery')?.checked) {
-        html += '<div class="overlay-badge"><i data-lucide="truck"></i> 1-3 kun yetkazish</div>';
-    }
-    if (document.getElementById('toggle-warranty')?.checked) {
-        html += '<div class="overlay-badge"><i data-lucide="shield"></i> 12 oy kafolat</div>';
-    }
-    if (document.getElementById('toggle-free-delivery')?.checked) {
-        html += '<div class="overlay-badge" style="background: rgba(16, 185, 129, 0.85);"><i data-lucide="gift"></i> Bepul yetkazish</div>';
-    }
-    if (document.getElementById('toggle-rating')?.checked) {
-        html += '<div class="overlay-badge" style="background: rgba(255, 107, 0, 0.85);"><i data-lucide="star"></i> ★ 4.8</div>';
-    }
-
-    container.innerHTML = html;
-    lucide.createIcons();
 }
 
 // ============================================
@@ -715,7 +769,6 @@ function animateCharts() {
 }
 
 function refreshAnalytics() {
-    // Add subtle refresh animation
     const items = document.querySelectorAll('.niche-item, .competitor-card');
     items.forEach(item => {
         item.style.opacity = '0';
@@ -735,6 +788,11 @@ function refreshAnalytics() {
 
 // ============================================
 // FBS / FBO OPERATIONS
+// Rasmiy qoidalar (seller.uzum.uz/manual/):
+// - Buyurtmani 24 soat ichida yig'ish shart
+// - Qaytarish muddati: 10 kun (sifatli tovar)
+// - Brak olib ketish: 30 kun ichida
+// - Taqiqlangan tovar jarimasi: 5 000 000 so'm gacha
 // ============================================
 let orderIdCounter = 20;
 
@@ -848,18 +906,21 @@ function updateFBSCounts() {
 
 // ============================================
 // AI SUPPORT CHAT
+// Rasmiy Uzum Market ma'lumotlari asosida javoblar
 // ============================================
 const aiResponses = [
     "Tushundim! Sizning savolingiz bo'yicha ma'lumot beraman.",
-    "Uzum Market'da muvaffaqiyatli sotish uchun mahsulot rasmlariga e'tibor bering. Birinchi rasm — eng muhimi!",
-    "Unit Economics — bu har bir mahsulot uchun real foydani hisoblash. Kalkulyator bo'limiga o'ting!",
-    "FBS modelida buyurtmani 24 soat ichida yig'ish kerak. Kechikish 500 so'm jarima!",
-    "SEO sarlavhada eng muhim kalit so'zlarni boshida yozing. Masalan: 'Premium Bluetooth quloqchin TWS'",
+    "Uzum Market'da rasm talablari: tovar rasmning 50% dan ko'p joyini egallashi, yuqori aniqlikda bo'lishi va begona narsalar ko'rinmasligi kerak!",
+    "Unit Economics — har bir mahsulot uchun real foydani hisoblash. Unit Iqtisodiyoti bo'limiga o'ting!",
+    "FBS modelida buyurtmani 24 soat ichida yig'ish kerak. Aks holda buyurtma bekor bo'lishi mumkin!",
+    "Sarlavha qoidasi: Tovar turi + Brend + Model + Xususiyat. Masalan: 'Bluetooth quloqchin simsiz TWS Pro sifatli stereo ovoz'",
+    "Rasmiy logistika narxlari (06.10.2025 dan): KGT — 5 000, O'GT — 8 000, YGT — 20 000 so'm.",
+    "Komissiya kategoriya bo'yicha farqlanadi: Elektronika 10-15%, Kiyim 22%, O'yinchoqlar 30%, Oziq-ovqat 5-20%.",
+    "Qaytarish muddati: sifatli tovar — 10 kun, brak tovarni olib ketish — 30 kun ichida.",
+    "Infografikada stop-so'zlar taqiqlangan: 'Eng yaxshi', '#1', 'Top', 'Rasmiy diler' — Uzum blokirovka qiladi!",
+    "Tovar saqlash: oborachivaemost 60 kundan oshsa — pullik saqlash boshlanadi. Aktsiyaga qo'shing yoki narxni tushiring!",
+    "Mahsulot rasmida matn faqat o'zbek yoki rus tilida bo'lishi kerak. Boshqa tillar taqiqlangan!",
     "Kam raqobatli nishalarni topish uchun 'Bozor Tahlili' bo'limiga o'ting. AI sizga eng yaxshi imkoniyatlarni ko'rsatadi.",
-    "Logistika narxlari: MGT (shahar ichida) — 2000-6000 so'm, viloyatlararo — 8000 so'm, yagona — 20000 so'm.",
-    "Mahsulot rasmida matn, logotip yoki vodyanoy belgi qo'yish mumkin emas — Uzum qoidasi!",
-    "Marja 20% dan past bo'lsa — narxni oshirish yoki tannarxni kamaytirish kerak.",
-    "Raqobatchilarni tahlil qilish uchun ularning eng ko'p sotiladigan mahsulotlariga e'tibor bering.",
 ];
 
 function initChat() {
@@ -879,11 +940,9 @@ function sendChatMessage() {
     const text = input.value.trim();
     if (!text) return;
 
-    // Add user message
     appendChatBubble(text, 'outgoing');
     input.value = '';
 
-    // Show typing indicator
     const typingId = 'typing-' + Date.now();
     messages.innerHTML += `
         <div class="chat-bubble incoming typing" id="${typingId}">
@@ -894,12 +953,30 @@ function sendChatMessage() {
     `;
     messages.scrollTop = messages.scrollHeight;
 
-    // Simulate AI response
+    // Kontekstli javob berish
     setTimeout(() => {
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
 
-        const response = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+        let response;
+        const lowerText = text.toLowerCase();
+
+        if (lowerText.includes('komissiya') || lowerText.includes('foiz')) {
+            response = "Komissiya kategoriya bo'yicha farqlanadi: Elektronika 10-15%, Kiyim 22%, O'yinchoqlar 30%, Oziq-ovqat 5-20%. To'liq hisob uchun Kalkulyator bo'limiga o'ting!";
+        } else if (lowerText.includes('logistika') || lowerText.includes('yetkazish')) {
+            response = "Rasmiy logistika narxlari (06.10.2025 dan): KGT (kichik) — 5 000, O'GT (o'rta) — 8 000, YGT (yirik) — 20 000 so'm. Qaytarilsa — logistika ham qaytariladi.";
+        } else if (lowerText.includes('fbs') || lowerText.includes('buyurtma')) {
+            response = "FBS modelida buyurtmani 24 soat ichida yig'ish kerak. Qaytarish muddati: 10 kun. Brak tovarni 30 kun ichida olib ketish shart, aks holda utilizatsiya qilinadi!";
+        } else if (lowerText.includes('rasm') || lowerText.includes('foto') || lowerText.includes('surat')) {
+            response = "Rasm talablari: tovar 50%+ kadr egallashi, yuqori aniqlik, och fon, begona narsalarsiz. Infografikada stop-so'zlar taqiqlangan. Matn faqat UZ/RU. AI aldamchi rasmlar taqiqlangan!";
+        } else if (lowerText.includes('foyda') || lowerText.includes('marja') || lowerText.includes('unit')) {
+            response = "Foydani hisoblash uchun Unit Iqtisodiyoti bo'limiga o'ting. Formula: Foyda = Narx - Tannarx - Komissiya - Logistika. Marja 20% dan past bo'lmasin!";
+        } else if (lowerText.includes('saqlash') || lowerText.includes('sklad') || lowerText.includes('ombor')) {
+            response = "Pulli saqlash qoidasi: oborachivaemost 60 kundan oshsa, saqlash pullik bo'ladi. Yangi SKU uchun — 30 kun bepul (kiyim/poyabzal uchun 60 kun).";
+        } else {
+            response = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+        }
+
         appendChatBubble(response, 'incoming');
     }, 1200 + Math.random() * 800);
 }

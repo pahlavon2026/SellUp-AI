@@ -1751,6 +1751,88 @@ select.input-field {
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(123, 47, 190, 0.4); }
 
+/* ---- FBS Info Banner ---- */
+.fbs-info-banner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.fbs-info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fbs-info-item i {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    background: linear-gradient(135deg, var(--violet-100), var(--violet-200));
+    border-radius: var(--radius-sm);
+    color: var(--violet-600);
+    flex-shrink: 0;
+}
+
+.fbs-info-item strong {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.fbs-info-item span {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+/* ---- Info Table ---- */
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+.info-table th,
+.info-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(123, 47, 190, 0.08);
+    font-size: 0.85rem;
+}
+
+.info-table th {
+    background: rgba(123, 47, 190, 0.06);
+    font-weight: 600;
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+}
+
+.info-table td {
+    color: var(--text-secondary);
+}
+
+.info-table tr:hover td {
+    background: rgba(123, 47, 190, 0.03);
+}
+
+/* ---- Responsive: FBS Info Banner ---- */
+@media (max-width: 768px) {
+    .fbs-info-banner {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fbs-info-banner {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* fadeInUp helper */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(10px); }
