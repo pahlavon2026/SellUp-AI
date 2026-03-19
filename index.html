@@ -641,6 +641,13 @@
                     </div>
                 </div>
 
+                <!-- Sales Funnel -->
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <h3 class="card-section-title"><i data-lucide="filter"></i> Sotuvlar Voronkasi</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-tertiary); margin-bottom: 16px;">Ko'rishlar → Kartochka ochish → Savatchaga → Buyurtma → Yetkazildi</p>
+                    <div class="funnel-container" id="sales-funnel"></div>
+                </div>
+
                 <div class="analytics-grid">
                     <div class="glass-card analytics-main">
                         <h3 class="card-section-title"><i data-lucide="target"></i> Kam raqobat / Yuqori talab nishalar</h3>
@@ -658,6 +665,96 @@
             </div>
         </section>
 
+        <!-- ====== PROMOTIONS (Aktsiyalar) ====== -->
+        <section id="page-promo" class="page">
+            <div class="page-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">
+                            <i data-lucide="megaphone" class="page-title-icon"></i>
+                            Mahsulot Ilgari Surish
+                        </h1>
+                        <p class="page-desc">Aktsiyalar, promokodlar va TOPga chiqish vositalari — sotuvlaringizni oshiring!</p>
+                    </div>
+                </div>
+
+                <!-- Promo KPI -->
+                <div class="kpi-row">
+                    <div class="kpi-card glass-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #7B2FBE, #A855F7);"><i data-lucide="zap"></i></div>
+                        <div class="kpi-info">
+                            <div class="kpi-value">3</div>
+                            <div class="kpi-label">Faol aktsiyalar</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10B981, #34D399);"><i data-lucide="tag"></i></div>
+                        <div class="kpi-info">
+                            <div class="kpi-value">5</div>
+                            <div class="kpi-label">Promokodlar</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #FF6B00, #FF9A3C);"><i data-lucide="rocket"></i></div>
+                        <div class="kpi-info">
+                            <div class="kpi-value">2</div>
+                            <div class="kpi-label">Boost kampaniyalar</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #EC4899, #F472B6);"><i data-lucide="percent"></i></div>
+                        <div class="kpi-info">
+                            <div class="kpi-value">+34%</div>
+                            <div class="kpi-label">Sotuv o'sishi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer Promo -->
+                <div class="glass-card" style="margin-bottom: 20px;">
+                    <h3 class="card-section-title"><i data-lucide="timer"></i> Timer Aktsiyalari</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-tertiary); margin-bottom: 16px;">Muddatli chegirmalar — xaridorlarni tezroq qaror qabul qilishga undaydi</p>
+                    <div id="timer-promos"></div>
+                </div>
+
+                <!-- Promo Codes -->
+                <div class="glass-card" style="margin-bottom: 20px;">
+                    <div class="studio-card-header">
+                        <h3><i data-lucide="tag"></i> Promokodlar</h3>
+                        <button class="btn-sm btn-primary" onclick="createPromoCode()">
+                            <i data-lucide="plus"></i> Yangi kod
+                        </button>
+                    </div>
+                    <div id="promo-codes-list"></div>
+                </div>
+
+                <!-- Boost to TOP -->
+                <div class="glass-card">
+                    <h3 class="card-section-title"><i data-lucide="rocket"></i> Bust v TOP (Reklama)</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-tertiary); margin-bottom: 16px;">Mahsulotingizni qidiruv natijalarida yuqoriga chiqaring. CPC model — faqat bosish uchun to'laysiz.</p>
+                    <div class="glass-card fbs-info-banner" style="margin-bottom: 16px;">
+                        <div class="fbs-info-item">
+                            <i data-lucide="eye"></i>
+                            <div><strong>CPC</strong><span>Bosish uchun to'lov</span></div>
+                        </div>
+                        <div class="fbs-info-item">
+                            <i data-lucide="shield"></i>
+                            <div><strong>Antifraud</strong><span>Soxta bosishdan himoya</span></div>
+                        </div>
+                        <div class="fbs-info-item">
+                            <i data-lucide="sliders"></i>
+                            <div><strong>Byudjet</strong><span>Kunlik limit belgilash</span></div>
+                        </div>
+                        <div class="fbs-info-item">
+                            <i data-lucide="bar-chart-3"></i>
+                            <div><strong>Statistika</strong><span>Real-time natijalar</span></div>
+                        </div>
+                    </div>
+                    <div id="boost-campaigns"></div>
+                </div>
+            </div>
+        </section>
+
         <!-- ====== FBS/FBO OPERATIONS ====== -->
         <section id="page-fbs" class="page">
             <div class="page-container">
@@ -667,104 +764,197 @@
                             <i data-lucide="package" class="page-title-icon"></i>
                             FBS / FBO Boshqaruv Paneli
                         </h1>
-                        <p class="page-desc">Buyurtmalar holatini kuzating. Yangi → Yig'ilmoqda → Yetkazilmoqda → Yetkazildi. <strong>24 soat</strong> ichida yig'ish shart!</p>
+                        <p class="page-desc">Buyurtmalar holatini kuzating va seller reytingini nazorat qiling.</p>
                     </div>
-                    <div class="header-actions">
+                </div>
+
+                <div class="fbs-overview-grid">
+                    <!-- Seller Rating -->
+                    <div class="glass-card rating-card">
+                        <div class="studio-card-header">
+                            <h3><i data-lucide="star"></i> Sotuvchi Reytingi (FBS)</h3>
+                            <span class="status-badge pass" id="rating-badge">Yaxshi</span>
+                        </div>
+                        <div class="rating-meter">
+                            <div class="rating-meter-bar">
+                                <div class="rating-zone rating-danger" style="width: 80%;"></div>
+                                <div class="rating-zone rating-warning" style="width: 10%;"></div>
+                                <div class="rating-zone rating-good" style="width: 10%;"></div>
+                                <div class="rating-pointer" id="rating-pointer"></div>
+                            </div>
+                            <div class="rating-labels">
+                                <span style="color: #EF4444;">0%</span>
+                                <span style="color: #EF4444;">80% <small>blokirovka</small></span>
+                                <span style="color: #F59E0B;">90% <small>ogohlantirish</small></span>
+                                <span style="color: #10B981;">100%</span>
+                            </div>
+                        </div>
+                        <div class="rating-stats">
+                            <div class="rating-stat">
+                                <div class="rating-stat-value" id="rating-value">96%</div>
+                                <div class="rating-stat-label">Reyting</div>
+                            </div>
+                            <div class="rating-stat">
+                                <div class="rating-stat-value" id="rating-delivered">24</div>
+                                <div class="rating-stat-label">Yetkazilgan</div>
+                            </div>
+                            <div class="rating-stat">
+                                <div class="rating-stat-value" id="rating-cancelled">1</div>
+                                <div class="rating-stat-label">Bekor qilingan</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FBS Info Banner -->
+                    <div class="glass-card fbs-info-banner-vert">
+                        <div class="fbs-info-item">
+                            <i data-lucide="clock"></i>
+                            <div><strong>24 soat</strong><span>Yig'ish muddati</span></div>
+                        </div>
+                        <div class="fbs-info-item">
+                            <i data-lucide="undo-2"></i>
+                            <div><strong>10 kun</strong><span>Qaytarish muddati</span></div>
+                        </div>
+                        <div class="fbs-info-item">
+                            <i data-lucide="alert-circle"></i>
+                            <div><strong>30 kun</strong><span>Brak tovar muddati</span></div>
+                        </div>
+                        <div class="fbs-info-item">
+                            <i data-lucide="ban"></i>
+                            <div><strong>5 mln</strong><span>Max jarima</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FBS Tabs -->
+                <div class="fbs-tabs">
+                    <div class="fbs-tab active" data-tab="orders" onclick="switchFBSTab('orders')">FBS Buyurtmalar</div>
+                    <div class="fbs-tab" data-tab="dbs" onclick="switchFBSTab('dbs')">DBS / EDBS</div>
+                    <div class="fbs-tab" data-tab="returns" onclick="switchFBSTab('returns')">Qaytarishlar</div>
+                    <div class="fbs-tab" data-tab="blocks" onclick="switchFBSTab('blocks')">Blokirovka</div>
+                </div>
+
+                <!-- TAB: ORDERS -->
+                <div id="fbs-tab-orders" class="fbs-tab-content active">
+                    <div class="header-actions" style="margin-bottom: 20px; justify-content: flex-end;">
                         <button class="btn-primary btn-sm" onclick="addNewOrder()">
                             <i data-lucide="plus"></i> Yangi buyurtma
                         </button>
                     </div>
+
+                    <div class="fbs-summary">
+                        <div class="fbs-stat glass-card">
+                            <div class="fbs-stat-dot" style="background: #7B2FBE;"></div>
+                            <div class="fbs-stat-value" id="fbs-new-count">5</div>
+                            <div class="fbs-stat-label">Yangi</div>
+                        </div>
+                        <div class="fbs-stat glass-card">
+                            <div class="fbs-stat-dot" style="background: #FF6B00;"></div>
+                            <div class="fbs-stat-value" id="fbs-assembly-count">3</div>
+                            <div class="fbs-stat-label">Yig'ilmoqda</div>
+                        </div>
+                        <div class="fbs-stat glass-card">
+                            <div class="fbs-stat-dot" style="background: #3B82F6;"></div>
+                            <div class="fbs-stat-value" id="fbs-delivering-count">4</div>
+                            <div class="fbs-stat-label">Yetkazilmoqda</div>
+                        </div>
+                        <div class="fbs-stat glass-card">
+                            <div class="fbs-stat-dot" style="background: #10B981;"></div>
+                            <div class="fbs-stat-value" id="fbs-delivered-count">8</div>
+                            <div class="fbs-stat-label">Yetkazildi</div>
+                        </div>
+                    </div>
+
+                    <div class="kanban-board">
+                        <div class="kanban-column" data-status="new">
+                            <div class="kanban-column-header">
+                                <div class="kanban-dot" style="background: #7B2FBE;"></div>
+                                <span>Yangi</span>
+                                <span class="kanban-count" id="kanban-new-count">5</span>
+                            </div>
+                            <div class="kanban-cards" id="kanban-new"></div>
+                        </div>
+                        <div class="kanban-column" data-status="assembly">
+                            <div class="kanban-column-header">
+                                <div class="kanban-dot" style="background: #FF6B00;"></div>
+                                <span>Yig'ilmoqda</span>
+                                <span class="kanban-count" id="kanban-assembly-count">3</span>
+                            </div>
+                            <div class="kanban-cards" id="kanban-assembly"></div>
+                        </div>
+                        <div class="kanban-column" data-status="delivering">
+                            <div class="kanban-column-header">
+                                <div class="kanban-dot" style="background: #3B82F6;"></div>
+                                <span>Yetkazilmoqda</span>
+                                <span class="kanban-count" id="kanban-delivering-count">4</span>
+                            </div>
+                            <div class="kanban-cards" id="kanban-delivering"></div>
+                        </div>
+                        <div class="kanban-column" data-status="delivered">
+                            <div class="kanban-column-header">
+                                <div class="kanban-dot" style="background: #10B981;"></div>
+                                <span>Yetkazildi</span>
+                                <span class="kanban-count" id="kanban-delivered-count">8</span>
+                            </div>
+                            <div class="kanban-cards" id="kanban-delivered"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- FBS Info Banner -->
-                <div class="glass-card fbs-info-banner">
-                    <div class="fbs-info-item">
-                        <i data-lucide="clock"></i>
-                        <div>
-                            <strong>24 soat</strong>
-                            <span>Buyurtmani yig'ish muddati</span>
-                        </div>
+                <!-- TAB: DBS -->
+                <div id="fbs-tab-dbs" class="fbs-tab-content">
+                    <div class="glass-card empty-state">
+                        <i data-lucide="truck"></i>
+                        <h3>DBS / EDBS buyurtmalar yo'q</h3>
+                        <p>Ushbu rejimda o'z logistikangiz orqali yetkazib berasiz.</p>
+                        <button class="btn-secondary btn-sm">O'rganish</button>
                     </div>
-                    <div class="fbs-info-item">
-                        <i data-lucide="undo-2"></i>
-                        <div>
-                            <strong>10 kun</strong>
-                            <span>Qaytarish muddati</span>
-                        </div>
+                </div>
+
+                <!-- TAB: RETURNS -->
+                <div id="fbs-tab-returns" class="fbs-tab-content">
+                    <div class="glass-card" style="margin-bottom: 20px; border-left: 4px solid #EF4444;">
+                        <p style="padding: 10px; font-size: 0.85rem;"><strong>Diqqat!</strong> Brak tovarlar 30 kundan ortiq omborda qolib ketsa, Uzum ularni utilizatsiya qilish huquqiga ega.</p>
                     </div>
-                    <div class="fbs-info-item">
-                        <i data-lucide="alert-circle"></i>
-                        <div>
-                            <strong>30 kun</strong>
-                            <span>Brak tovarni olib ketish</span>
-                        </div>
-                    </div>
-                    <div class="fbs-info-item">
-                        <i data-lucide="ban"></i>
-                        <div>
-                            <strong>5 mln</strong>
-                            <span>Taqiqlangan tovar jarimasi</span>
+                    <div class="glass-card">
+                        <div class="info-table-wrap">
+                            <table class="info-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mahsulot</th>
+                                        <th>Hozirgi holati</th>
+                                        <th>Sabab</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="returns-list">
+                                    <tr>
+                                        <td>Bluetooth quloqchin</td>
+                                        <td>Qaytarish uchun omborda</td>
+                                        <td>Mijoz o'yladi</td>
+                                        <td><span class="status-badge warning">Kutilmoqda</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Smart soat M7</td>
+                                        <td>Sellerga qaytarildi</td>
+                                        <td>Brak (ekran)</td>
+                                        <td><span class="status-badge pass">Bajarildi</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- FBS Status Summary -->
-                <div class="fbs-summary">
-                    <div class="fbs-stat glass-card">
-                        <div class="fbs-stat-dot" style="background: #7B2FBE;"></div>
-                        <div class="fbs-stat-value" id="fbs-new-count">5</div>
-                        <div class="fbs-stat-label">Yangi</div>
-                    </div>
-                    <div class="fbs-stat glass-card">
-                        <div class="fbs-stat-dot" style="background: #FF6B00;"></div>
-                        <div class="fbs-stat-value" id="fbs-assembly-count">3</div>
-                        <div class="fbs-stat-label">Yig'ilmoqda</div>
-                    </div>
-                    <div class="fbs-stat glass-card">
-                        <div class="fbs-stat-dot" style="background: #3B82F6;"></div>
-                        <div class="fbs-stat-value" id="fbs-delivering-count">4</div>
-                        <div class="fbs-stat-label">Yetkazilmoqda</div>
-                    </div>
-                    <div class="fbs-stat glass-card">
-                        <div class="fbs-stat-dot" style="background: #10B981;"></div>
-                        <div class="fbs-stat-value" id="fbs-delivered-count">8</div>
-                        <div class="fbs-stat-label">Yetkazildi</div>
-                    </div>
-                </div>
-
-                <!-- Kanban Board -->
-                <div class="kanban-board">
-                    <div class="kanban-column" data-status="new">
-                        <div class="kanban-column-header">
-                            <div class="kanban-dot" style="background: #7B2FBE;"></div>
-                            <span>Yangi</span>
-                            <span class="kanban-count" id="kanban-new-count">5</span>
+                <!-- TAB: BLOCKS -->
+                <div id="fbs-tab-blocks" class="fbs-tab-content">
+                    <div class="glass-card">
+                        <h3 class="card-section-title"><i data-lucide="shield-alert"></i> Blokirovka tekshiruvi</h3>
+                        <div class="niche-list">
+                            <div class="niche-item"><span>Reyting bo'yicha</span><span class="status-badge pass">Faol</span></div>
+                            <div class="niche-item"><span>Taqiqlangan so'zlar</span><span class="status-badge pass">Toza</span></div>
+                            <div class="niche-item"><span>Foto muvofiqligi</span><span class="status-badge pass">Muvofiq</span></div>
                         </div>
-                        <div class="kanban-cards" id="kanban-new"></div>
-                    </div>
-                    <div class="kanban-column" data-status="assembly">
-                        <div class="kanban-column-header">
-                            <div class="kanban-dot" style="background: #FF6B00;"></div>
-                            <span>Yig'ilmoqda</span>
-                            <span class="kanban-count" id="kanban-assembly-count">3</span>
-                        </div>
-                        <div class="kanban-cards" id="kanban-assembly"></div>
-                    </div>
-                    <div class="kanban-column" data-status="delivering">
-                        <div class="kanban-column-header">
-                            <div class="kanban-dot" style="background: #3B82F6;"></div>
-                            <span>Yetkazilmoqda</span>
-                            <span class="kanban-count" id="kanban-delivering-count">4</span>
-                        </div>
-                        <div class="kanban-cards" id="kanban-delivering"></div>
-                    </div>
-                    <div class="kanban-column" data-status="delivered">
-                        <div class="kanban-column-header">
-                            <div class="kanban-dot" style="background: #10B981;"></div>
-                            <span>Yetkazildi</span>
-                            <span class="kanban-count" id="kanban-delivered-count">8</span>
-                        </div>
-                        <div class="kanban-cards" id="kanban-delivered"></div>
                     </div>
                 </div>
             </div>
@@ -831,6 +1021,10 @@
             <div class="dock-item" data-page="analytics" onclick="navigateTo('analytics')">
                 <i data-lucide="bar-chart-3"></i>
                 <span class="dock-label">Tahlil</span>
+            </div>
+            <div class="dock-item" data-page="promo" onclick="navigateTo('promo')">
+                <i data-lucide="megaphone"></i>
+                <span class="dock-label">Aktsiya</span>
             </div>
             <div class="dock-item" data-page="fbs" onclick="navigateTo('fbs')">
                 <i data-lucide="package"></i>

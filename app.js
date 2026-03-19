@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initUnitEconomics();
     initStudio();
     initAnalytics();
+    initPromo();
     initFBS();
     initChat();
     initCounters();
@@ -51,8 +52,9 @@ function navigateTo(pageId) {
 
         if (pageId === 'kommissiya') calculateKommissiya();
         if (pageId === 'unit') calculateUnitEconomics();
-        if (pageId === 'analytics') animateCharts();
-        if (pageId === 'fbs') renderKanban();
+        if (pageId === 'analytics') { animateCharts(); renderSalesFunnel(); }
+        if (pageId === 'promo') renderPromo();
+        if (pageId === 'fbs') { renderKanban(); updateSellerRating(); }
 
         initCounters();
     }
@@ -97,12 +99,14 @@ const commandActions = [
     { name: 'Unit Iqtisodiyoti', icon: 'trending-up', action: () => navigateTo('unit'), shortcut: '3' },
     { name: 'AI Kontent Studio', icon: 'sparkles', action: () => navigateTo('studio'), shortcut: '4' },
     { name: 'Bozor Tahlili', icon: 'bar-chart-3', action: () => navigateTo('analytics'), shortcut: '5' },
-    { name: 'FBS / FBO Boshqaruv', icon: 'package', action: () => navigateTo('fbs'), shortcut: '6' },
-    { name: 'AI Yordamchi', icon: 'message-circle', action: () => navigateTo('support'), shortcut: '7' },
+    { name: 'Aktsiya & Promokodlar', icon: 'megaphone', action: () => navigateTo('promo'), shortcut: '6' },
+    { name: 'FBS / FBO Boshqaruv', icon: 'package', action: () => navigateTo('fbs'), shortcut: '7' },
+    { name: 'AI Yordamchi', icon: 'message-circle', action: () => navigateTo('support'), shortcut: '8' },
     { name: 'Yangi buyurtma qo\'shish', icon: 'plus-circle', action: () => { navigateTo('fbs'); setTimeout(addNewOrder, 500); } },
     { name: 'Foydani hisoblash', icon: 'wallet', action: () => navigateTo('unit') },
     { name: 'Komissiya hisoblash', icon: 'percent', action: () => navigateTo('kommissiya') },
     { name: 'Rasm yuklash', icon: 'upload', action: () => navigateTo('studio') },
+    { name: 'Promokod yaratish', icon: 'tag', action: () => { navigateTo('promo'); setTimeout(createPromoCode, 500); } },
 ];
 
 let highlightedIndex = 0;
@@ -768,6 +772,51 @@ function animateCharts() {
     }, 300);
 }
 
+// ---- Sales Funnel ----
+const funnelData = [
+    { stage: 'Ko\'rishlar', value: 12400, color: '#7B2FBE', icon: 'eye' },
+    { stage: 'Kartochka ochish', value: 4800, color: '#A855F7', icon: 'mouse-pointer' },
+    { stage: 'Savatchaga', value: 1240, color: '#FF6B00', icon: 'shopping-cart' },
+    { stage: 'Buyurtma', value: 680, color: '#3B82F6', icon: 'credit-card' },
+    { stage: 'Yetkazildi', value: 520, color: '#10B981', icon: 'check-circle' },
+];
+
+function renderSalesFunnel() {
+    const container = document.getElementById('sales-funnel');
+    if (!container) return;
+
+    const maxValue = funnelData[0].value;
+
+    container.innerHTML = funnelData.map((item, i) => {
+        const widthPercent = (item.value / maxValue) * 100;
+        const conversion = i > 0 ? ((item.value / funnelData[i - 1].value) * 100).toFixed(1) : '100';
+
+        return `
+            <div class="funnel-step" style="animation: fadeInUp 0.4s ease ${i * 0.1}s both;">
+                <div class="funnel-bar-wrap">
+                    <div class="funnel-bar" style="width: 0%; background: ${item.color}; transition: width 0.8s ease ${i * 0.15}s;" data-width="${widthPercent}">
+                        <i data-lucide="${item.icon}"></i>
+                        <span>${item.stage}</span>
+                    </div>
+                </div>
+                <div class="funnel-meta">
+                    <strong>${formatNumber(item.value)}</strong>
+                    ${i > 0 ? `<span class="funnel-conv">${conversion}%</span>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    lucide.createIcons();
+
+    // Animate bars
+    setTimeout(() => {
+        document.querySelectorAll('.funnel-bar').forEach(bar => {
+            bar.style.width = bar.dataset.width + '%';
+        });
+    }, 100);
+}
+
 function refreshAnalytics() {
     const items = document.querySelectorAll('.niche-item, .competitor-card');
     items.forEach(item => {
@@ -921,7 +970,26 @@ const aiResponses = [
     "Tovar saqlash: oborachivaemost 60 kundan oshsa — pullik saqlash boshlanadi. Aktsiyaga qo'shing yoki narxni tushiring!",
     "Mahsulot rasmida matn faqat o'zbek yoki rus tilida bo'lishi kerak. Boshqa tillar taqiqlangan!",
     "Kam raqobatli nishalarni topish uchun 'Bozor Tahlili' bo'limiga o'ting. AI sizga eng yaxshi imkoniyatlarni ko'rsatadi.",
+    "FBS Reytingi: 80% dan past bo'lsa, xizmat 3 kunga bloklanadi. 90% dan past bo'lsa, Uzum ogohlantirish beradi!",
+    "Aktsiya turlari: Timer (chegirma vaqt bilan), Promokod (do'kon kodi), Bust v TOP (reklama).",
+    "DBS / EDBS: Ushbu modelda seller tovarlarni o'z kuryerlari yoki Uzum Tezkor orqali yetkazishi mumkin.",
 ];
+
+function switchFBSTab(tabId) {
+    const tabs = document.querySelectorAll('.fbs-tab');
+    const contents = document.querySelectorAll('.fbs-tab-content');
+
+    tabs.forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tabId);
+    });
+    
+    contents.forEach(c => {
+        c.classList.toggle('active', c.id === `fbs-tab-${tabId}`);
+    });
+
+    if (tabId === 'orders') renderKanban();
+    setTimeout(() => lucide.createIcons(), 50);
+}
 
 function initChat() {
     const input = document.getElementById('chat-input');
@@ -990,6 +1058,204 @@ function appendChatBubble(text, type) {
     bubble.textContent = text;
     messages.appendChild(bubble);
     messages.scrollTop = messages.scrollHeight;
+}
+
+// ============================================
+// PROMOTIONS MODULE
+// Aktsiyalar, Promokodlar, Bust v TOP
+// Manba: seller.uzum.uz/manual/10.promotion/
+// ============================================
+const timerPromos = [
+    { id: 1, name: 'Bluetooth quloqchin TWS Pro', oldPrice: 250000, newPrice: 189000, discount: 24, endTime: '2026-03-22T23:59', status: 'active', sold: 47 },
+    { id: 2, name: 'Smart soat M7', oldPrice: 420000, newPrice: 340000, discount: 19, endTime: '2026-03-21T18:00', status: 'active', sold: 23 },
+    { id: 3, name: 'LED stol chiroq 3 rejimli', oldPrice: 165000, newPrice: 125000, discount: 24, endTime: '2026-03-20T12:00', status: 'ending', sold: 89 },
+];
+
+let promoCodes = [
+    { code: 'SELLUP10', discount: 10, type: 'percent', minOrder: 50000, used: 34, limit: 100, status: 'active' },
+    { code: 'YANGI2026', discount: 15000, type: 'sum', minOrder: 100000, used: 12, limit: 50, status: 'active' },
+    { code: 'VIP20', discount: 20, type: 'percent', minOrder: 200000, used: 50, limit: 50, status: 'expired' },
+];
+
+const boostCampaigns = [
+    { name: 'Quloqchinlar TOP', budget: 500000, spent: 234000, clicks: 1240, orders: 47, cpc: 189, status: 'active' },
+    { name: 'Smart soatlar', budget: 300000, spent: 156000, clicks: 780, orders: 28, cpc: 200, status: 'active' },
+];
+
+function initPromo() {
+    renderPromo();
+}
+
+function renderPromo() {
+    renderTimerPromos();
+    renderPromoCodes();
+    renderBoostCampaigns();
+}
+
+function renderTimerPromos() {
+    const container = document.getElementById('timer-promos');
+    if (!container) return;
+
+    container.innerHTML = timerPromos.map((promo, i) => {
+        const now = new Date();
+        const end = new Date(promo.endTime);
+        const diff = end - now;
+        const hours = Math.max(0, Math.floor(diff / (1000 * 60 * 60)));
+        const mins = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
+
+        return `
+            <div class="promo-card" style="animation: fadeInUp 0.4s ease ${i * 0.1}s both;">
+                <div class="promo-card-header">
+                    <div>
+                        <div class="promo-card-name">${promo.name}</div>
+                        <div class="promo-card-prices">
+                            <span class="old-price">${formatNumber(promo.oldPrice)} so'm</span>
+                            <span class="new-price">${formatNumber(promo.newPrice)} so'm</span>
+                            <span class="discount-badge">-${promo.discount}%</span>
+                        </div>
+                    </div>
+                    <div class="promo-timer ${promo.status === 'ending' ? 'timer-ending' : ''}">
+                        <i data-lucide="timer"></i>
+                        ${hours}s ${mins}d qoldi
+                    </div>
+                </div>
+                <div class="promo-card-stats">
+                    <span><i data-lucide="shopping-bag"></i> ${promo.sold} ta sotildi</span>
+                    <span class="status-pill ${promo.status}">${promo.status === 'active' ? 'Faol' : 'Tugayapti'}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    lucide.createIcons();
+}
+
+function renderPromoCodes() {
+    const container = document.getElementById('promo-codes-list');
+    if (!container) return;
+
+    container.innerHTML = promoCodes.map((code, i) => `
+        <div class="promo-code-card" style="animation: fadeInUp 0.3s ease ${i * 0.08}s both;">
+            <div class="promo-code-main">
+                <div class="promo-code-tag">${code.code}</div>
+                <div class="promo-code-desc">
+                    ${code.type === 'percent' ? code.discount + '% chegirma' : formatNumber(code.discount) + ' so\'m chegirma'}
+                    · Min: ${formatNumber(code.minOrder)} so'm
+                </div>
+            </div>
+            <div class="promo-code-stats">
+                <div class="promo-code-usage">
+                    <div class="usage-bar">
+                        <div class="usage-fill" style="width: ${(code.used / code.limit) * 100}%;"></div>
+                    </div>
+                    <span>${code.used}/${code.limit}</span>
+                </div>
+                <span class="status-pill ${code.status}">${code.status === 'active' ? 'Faol' : 'Tugagan'}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function createPromoCode() {
+    const codes = ['FLASH15', 'SUPER25', 'MEGA30', 'BONUS10', 'SALE20'];
+    const newCode = {
+        code: codes[Math.floor(Math.random() * codes.length)] + Math.floor(Math.random() * 99),
+        discount: [10, 15, 20, 25][Math.floor(Math.random() * 4)],
+        type: 'percent',
+        minOrder: [50000, 100000, 150000][Math.floor(Math.random() * 3)],
+        used: 0,
+        limit: [50, 100, 200][Math.floor(Math.random() * 3)],
+        status: 'active'
+    };
+    promoCodes.unshift(newCode);
+    renderPromoCodes();
+    lucide.createIcons();
+}
+
+function renderBoostCampaigns() {
+    const container = document.getElementById('boost-campaigns');
+    if (!container) return;
+
+    container.innerHTML = boostCampaigns.map((camp, i) => {
+        const spentPercent = (camp.spent / camp.budget) * 100;
+        const roi = camp.orders > 0 ? ((camp.orders * 150000 - camp.spent) / camp.spent * 100).toFixed(0) : 0;
+
+        return `
+            <div class="boost-card" style="animation: fadeInUp 0.4s ease ${i * 0.1}s both;">
+                <div class="boost-header">
+                    <div>
+                        <div class="boost-name">${camp.name}</div>
+                        <span class="status-pill active">Faol</span>
+                    </div>
+                    <div class="boost-roi" style="color: ${roi > 0 ? '#10B981' : '#EF4444'};">
+                        ROI: ${roi}%
+                    </div>
+                </div>
+                <div class="boost-stats">
+                    <div class="boost-stat">
+                        <div class="boost-stat-value">${formatNumber(camp.clicks)}</div>
+                        <div class="boost-stat-label">Bosishlar</div>
+                    </div>
+                    <div class="boost-stat">
+                        <div class="boost-stat-value">${camp.orders}</div>
+                        <div class="boost-stat-label">Buyurtmalar</div>
+                    </div>
+                    <div class="boost-stat">
+                        <div class="boost-stat-value">${formatNumber(camp.cpc)}</div>
+                        <div class="boost-stat-label">CPC (so'm)</div>
+                    </div>
+                </div>
+                <div class="boost-budget">
+                    <div class="boost-budget-bar">
+                        <div class="boost-budget-fill" style="width: ${spentPercent}%;"></div>
+                    </div>
+                    <span>${formatNumber(camp.spent)} / ${formatNumber(camp.budget)} so'm</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    lucide.createIcons();
+}
+
+// ============================================
+// FBS SELLER RATING
+// Rasmiy formula: 100% - bekor qilingan buyurtmalar (8 kun ichida)
+// 90% dan past = ogohlantirish
+// 80% dan past + 10 buyurtma = FBS blokirovka (3 kun)
+// ============================================
+function updateSellerRating() {
+    const delivered = orders.delivered.length + orders.delivering.length;
+    const total = delivered + orders.new.length + orders.assembly.length;
+    const cancelled = 1; // Simulated
+
+    // Rasmiy formula: 100% - (bekor / (jami - yangi - yig'ilmoqda)) * 100
+    const rating = total > 0 ? Math.max(0, ((delivered / (delivered + cancelled)) * 100)) : 100;
+
+    const pointer = document.getElementById('rating-pointer');
+    const badge = document.getElementById('rating-badge');
+    const ratingVal = document.getElementById('rating-value');
+    const ratingDel = document.getElementById('rating-delivered');
+    const ratingCan = document.getElementById('rating-cancelled');
+
+    if (pointer) {
+        pointer.style.left = `${rating}%`;
+    }
+
+    if (ratingVal) ratingVal.textContent = rating.toFixed(0) + '%';
+    if (ratingDel) ratingDel.textContent = delivered;
+    if (ratingCan) ratingCan.textContent = cancelled;
+
+    if (badge) {
+        if (rating >= 90) {
+            badge.textContent = 'Yaxshi ✓';
+            badge.className = 'status-badge pass';
+        } else if (rating >= 80) {
+            badge.textContent = 'Ogohlantirish ⚠';
+            badge.className = 'status-badge warning';
+        } else {
+            badge.textContent = 'Blokirovka xavfi ✗';
+            badge.className = 'status-badge fail';
+        }
+    }
 }
 
 // ============================================
