@@ -1,5 +1,6 @@
 // SellUp AI — Main Application Logic (Globally Accessible Version)
-// ESM Import olib tashlandi, index.html dagi importmap orqali ishlaydi.
+// ESM SDK is loaded via index.html importmap.
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
  * SellUp AI — Main Application Logic
@@ -45,6 +46,13 @@ function initAll() {
     }
 }
 
+window.initAll = initAll;
+window.initStudio = initStudio;
+window.navigateTo = navigateTo;
+window.generateImagen3 = generateImagen3;
+window.sendConversationalEdit = sendConversationalEdit;
+window.saveGeminiKey = saveGeminiKey;
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAll);
 } else {
@@ -55,12 +63,6 @@ if (document.readyState === 'loading') {
 // NAVIGATION (SPA Router)
 // ============================================
 let currentPage = 'hero';
-
-// Expose to window for HTML onclick access
-window.navigateTo = navigateTo;
-window.generateImagen3 = generateImagen3;
-window.sendConversationalEdit = sendConversationalEdit;
-window.saveGeminiKey = saveGeminiKey;
 
 function navigateTo(pageId) {
     const pages = document.querySelectorAll('.page');
