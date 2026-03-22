@@ -695,11 +695,24 @@ function generateMockImages(prompt, count, ratio) {
 
     const seed = Math.floor(Math.random() * 9999999);
     let result = [];
+    
+    // Keywords for Unsplash fallback
+    const keywords = prompt.split(',')[0].substring(0, 30);
+
     for(let i=0; i<count; i++) {
-        // use specific seed for each to get distinct images
         const encodedPrompt = encodeURIComponent(prompt);
-        const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed + i}&nologo=true&enhance=true`;
-        result.push(url);
+        // Main AI Provider (Pollinations)
+        const aiUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed + i}&nologo=true&enhance=true`;
+        
+        // Backup Provider (Unsplash Source - high quality placeholder based on prompt)
+        const backupUrl = `https://source.unsplash.com/featured/${width}x${height}/?${encodeURIComponent(keywords)}`;
+        
+        // Last Resort (Picsum)
+        const lastResortUrl = `https://picsum.photos/seed/${seed + i}/${width}/${height}`;
+
+        // We return the AI URL but will handle the 'onerror' in a better way if possible.
+        // For this demo, we can also use a clever trick: if it's the 2nd generation, use a different one.
+        result.push(aiUrl);
     }
     return result;
 }
@@ -716,6 +729,18 @@ function renderStudioGallery() {
     currentGeneratedImages.forEach((imgSrc, index) => {
         const img = document.createElement('img');
         img.src = imgSrc;
+        img.alt = "SellUp AI Generated";
+        
+        // CRITICAL: Error handling for image loading (Fallback to Unsplash/Picsum)
+        img.onerror = () => {
+            console.warn("Image load failed, trying Unsplash fallback...");
+            const keywords = "product,marketing,minimalist";
+            img.src = `https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=1000`; // High-end watch as placeholder
+            img.onerror = () => {
+                img.src = `https://picsum.photos/1024/1024?random=${index}`;
+            };
+        };
+
         if (index === selectedEditImageIndex) img.classList.add('selected-for-edit');
         img.onclick = () => {
             selectedEditImageIndex = index;
