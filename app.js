@@ -1,4 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// SellUp AI — Main Application Logic (Globally Accessible Version)
+// ESM Import olib tashlandi, index.html dagi importmap orqali ishlaydi.
 
 /**
  * SellUp AI — Main Application Logic
@@ -54,6 +55,12 @@ if (document.readyState === 'loading') {
 // NAVIGATION (SPA Router)
 // ============================================
 let currentPage = 'hero';
+
+// Expose to window for HTML onclick access
+window.navigateTo = navigateTo;
+window.generateImagen3 = generateImagen3;
+window.sendConversationalEdit = sendConversationalEdit;
+window.saveGeminiKey = saveGeminiKey;
 
 function navigateTo(pageId) {
     const pages = document.querySelectorAll('.page');
