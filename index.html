@@ -1085,6 +1085,13 @@
     <div class="cmd-hint" id="cmd-hint">
         <kbd>Ctrl</kbd> + <kbd>K</kbd> — Tezkor buyruqlar
     </div>
-    <script src="app.js?v=2"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+    </script>
+    <script type="module" src="app.js?v=3"></script>
 </body>
 </html>
