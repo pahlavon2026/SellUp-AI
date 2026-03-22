@@ -16,7 +16,15 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Styles -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
+    <!-- Gemini AI SDK -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
 </head>
 <body>
 
@@ -506,88 +514,124 @@
                             <i data-lucide="sparkles" class="page-title-icon"></i>
                             AI Kontent Studio
                         </h1>
-                        <p class="page-desc">Mahsulot rasmlarini yuklang. AI tahlil qiladi, SEO sarlavha va tavsif yaratadi, va Uzum talablariga muvofiqligini tekshiradi.</p>
+                        <p class="page-desc">Mahsulot rasmlarini professional studiya sifatiga o'tkazing. Prompt yozing va AI natijasini bir zumda ko'ring.</p>
                     </div>
                 </div>
 
-                <div class="studio-grid">
-                    <!-- Upload Area -->
-                    <div class="studio-upload-area glass-card" id="upload-area">
-                        <div class="upload-placeholder" id="upload-placeholder">
-                            <div class="upload-icon-wrap bounce-in">
-                                <i data-lucide="cloud-upload"></i>
-                            </div>
-                            <h3>Mahsulot rasmini yuklang</h3>
-                            <p>Rasm tashlang yoki bosing. JPG, PNG, WebP</p>
-                            <input type="file" id="file-upload" accept="image/*" hidden>
-                            <button class="btn-primary" onclick="document.getElementById('file-upload').click()">
-                                <i data-lucide="upload"></i> Rasm tanlang
-                            </button>
-                        </div>
-                        <div class="upload-preview hidden" id="upload-preview">
-                            <img id="preview-image" alt="Preview">
-                            <div class="compliance-badges" id="compliance-badges"></div>
-                            <div class="infographic-overlays" id="infographic-overlays"></div>
-                        </div>
-                    </div>
-
-                    <!-- AI Analysis Panel -->
-                    <div class="studio-panel">
-                        <!-- Compliance Check -->
-                        <div class="glass-card studio-card">
-                            <div class="studio-card-header">
-                                <h3><i data-lucide="shield-check"></i> Uzum Market Muvofiqlik Tekshiruvi</h3>
-                                <span class="status-badge" id="compliance-status">Kutilmoqda</span>
-                            </div>
-                            <div class="compliance-rules" id="compliance-rules">
-                                <div class="rule-item">
-                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
-                                    <span>Tovar rasmda 50% dan ko'p joy egallashi kerak</span>
-                                </div>
-                                <div class="rule-item">
-                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
-                                    <span>Yuqori aniqlik — loyqalanmasdan, shovqinsiz</span>
-                                </div>
-                                <div class="rule-item">
-                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
-                                    <span>Bir xil, och fon tavsiya etiladi</span>
-                                </div>
-                                <div class="rule-item">
-                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
-                                    <span>Begona narsalar va insonlar aks etmasligi kerak</span>
-                                </div>
-                                <div class="rule-item">
-                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
-                                    <span>Infografikada stop-so'zlar taqiqlangan</span>
-                                </div>
-                                <div class="rule-item">
-                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
-                                    <span>Matn faqat o'zbek yoki rus tilida</span>
-                                </div>
-                                <div class="rule-item">
-                                    <div class="rule-check pending"><i data-lucide="circle"></i></div>
-                                    <span>AI yaratilgan aldamchi rasm taqiqlangan</span>
-                                </div>
+                <div class="studio-main-layout">
+                    <!-- Left Sidebar: Controls -->
+                    <aside class="studio-sidebar glass-card">
+                        <div class="sidebar-section">
+                            <h3 class="section-title"><i data-lucide="message-square"></i> AI Prompt Qisqacha</h3>
+                            <div class="prompt-input-group">
+                                <label for="studio-prompt-name">Buyruq yoki G'oya</label>
+                                <textarea id="studio-prompt-name" class="input-field-sm" rows="3" placeholder="Masalan: Kofe uchun reklama banneri, stolda o'tirgan ishchi kofe ichmoqda"></textarea>
+                                
+                                <label for="studio-prompt-text" style="color:var(--violet-400);">Rasmdagi matn (Infografika/Banner uchun)</label>
+                                <input type="text" id="studio-prompt-text" class="input-field-sm" placeholder="Masalan: Visit Uzbekistan (Majburiy emas)">
                             </div>
                         </div>
 
-                        <!-- SEO Generator -->
-                        <div class="glass-card studio-card">
-                            <div class="studio-card-header">
-                                <h3><i data-lucide="type"></i> SEO Sarlavha va Tavsif</h3>
-                                <button class="btn-sm btn-primary" id="generate-seo-btn" disabled onclick="generateSEO()">
-                                    <i data-lucide="wand-2"></i> Yaratish
+                        <div class="sidebar-section">
+                            <h3 class="section-title"><i data-lucide="sliders"></i> Imagen 3 Parametrlari</h3>
+                            <div class="prompt-input-group">
+                                <label>O'lcham (Aspect Ratio)</label>
+                                <select id="studio-param-ratio" class="input-field-sm">
+                                    <option value="1:1">1:1 (Kvadrat)</option>
+                                    <option value="16:9">16:9 (Widescreen)</option>
+                                    <option value="9:16">9:16 (Vertical Story)</option>
+                                    <option value="4:3">4:3 (Landscape)</option>
+                                </select>
+
+                                <label>Rasm Turi</label>
+                                <select id="studio-param-type" class="input-field-sm">
+                                    <option value="Product photography">Mahsulot rasmi</option>
+                                    <option value="Professional infographic">Infografika</option>
+                                    <option value="Digital illustration">Illyustratsiya</option>
+                                    <option value="Clean UI/UX Design">UI Dizayn</option>
+                                </select>
+
+                                <label>Uslub (Style)</label>
+                                <select id="studio-param-style" class="input-field-sm">
+                                    <option value="Photorealistic, ultra-detailed, cinematic lighting">Fotorealistik</option>
+                                    <option value="Minimalist, clean aesthetic, soft studio lighting">Minimalist</option>
+                                    <option value="Vibrant 3D render, cartoonish, expressive">Multfilm (3D)</option>
+                                    <option value="Cyberpunk, neon lights, dramatic shadows">Neon</option>
+                                </select>
+
+                                <label>Variantlar soni</label>
+                                <select id="studio-param-count" class="input-field-sm">
+                                    <option value="1">1 ta rasm</option>
+                                    <option value="2">2 ta rasm</option>
+                                    <option value="4">4 ta rasm</option>
+                                </select>
+
+                                <button class="btn-primary btn-sm w-full" style="margin-top: 10px;" id="generate-image-btn" onclick="generateImagen3()">
+                                    <i data-lucide="sparkles"></i> 4K Rasm Yaratish
                                 </button>
                             </div>
-                            <div class="seo-output" id="seo-output">
-                                <div class="seo-placeholder">
-                                    <i data-lucide="file-text"></i>
-                                    <p>Rasm yuklanganidan keyin AI sarlavha va tavsif yaratadi</p>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <button class="btn-secondary btn-sm w-full" id="download-studio-btn" disabled>
+                                <i data-lucide="download"></i> Saqlash
+                            </button>
+                        </div>
+
+                        <!-- Gemini / Imagen Settings -->
+                        <div class="sidebar-section gemini-settings-section">
+                            <div class="section-header-flex">
+                                <h3 class="section-title"><i data-lucide="settings"></i> AI API Sozlamalari</h3>
+                                <span class="gemini-status-dot" id="gemini-status-dot"></span>
+                            </div>
+                            <div class="gemini-api-input-wrap">
+                                <input type="password" id="gemini-api-key" class="input-field-sm" placeholder="Gemini API Key...">
+                                <button class="btn-icon-sm" onclick="saveGeminiKey()" title="Saqlash">
+                                    <i data-lucide="save"></i>
+                                </button>
+                            </div>
+                            <p class="section-hint">API Key orqali ulangan holda bepul ishlaydi.</p>
+                        </div>
+                    </aside>
+
+                    <!-- Center: Canvas Area -->
+                    <div class="studio-canvas-layout">
+                        <div class="studio-canvas-area" id="studio-canvas-area">
+                            <div class="canvas-top-bar">
+                                <div class="resolution-badge" id="studio-resolution-badge"><i data-lucide="expand"></i> 1024 × 1024 (1:1)</div>
+                            </div>
+                            <div class="studio-upload-area glass-card" id="upload-area">
+                                <div class="upload-placeholder" id="upload-placeholder">
+                                    <div class="upload-icon-wrap bounce-in">
+                                        <i data-lucide="image"></i>
+                                    </div>
+                                    <h3>Generatsiya uchun tayyor</h3>
+                                    <p>Chap tarafdan parametrlarni kiritib "Yaratish" tugmasini bosing</p>
                                 </div>
+                                
+                                <!-- Dynamic Output Gallery -->
+                                <div class="canvas-gallery-container hidden" id="canvas-gallery-container">
+                                    <!-- Imagelar bu yerda chiqadi -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NanoBanana Conversational Edit Interface -->
+                        <div class="studio-chat-edit glass-card hidden" id="studio-chat-edit">
+                            <div class="chat-edit-header">
+                                <i data-lucide="magic-wand"></i> NanoBanana AI Tahrir (Suhbat orqali)
+                            </div>
+                            <div class="chat-edit-messages" id="chat-edit-messages">
+                                <div class="chat-edit-bubble system">Rasm tayyor! Uni tahrirlash uchun menga buyruq bering (Masalan: "Qahvani choyga almashtir").</div>
+                            </div>
+                            <div class="chat-edit-input-wrap">
+                                <input type="text" id="chat-edit-input" placeholder="Nimani o'zgartiramiz?">
+                                <button class="chat-edit-send" onclick="sendConversationalEdit()"><i data-lucide="send"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </section>
 
@@ -1041,7 +1085,6 @@
     <div class="cmd-hint" id="cmd-hint">
         <kbd>Ctrl</kbd> + <kbd>K</kbd> — Tezkor buyruqlar
     </div>
-
-    <script src="app.js"></script>
+    <script src="app.js?v=2"></script>
 </body>
 </html>

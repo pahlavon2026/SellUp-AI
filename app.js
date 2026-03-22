@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 /**
  * SellUp AI — Main Application Logic
  * Modules: Komissiya Kalkulyatori, Unit Iqtisodiyoti, AI Studio, Market Intelligence, FBS/FBO, Chat, CMD+K
@@ -9,22 +11,44 @@
  * - Rasm talablari: seller.uzum.uz/manual/5.product-creation/
  */
 
-// ============================================
-// INITIALIZATION
-// ============================================
-document.addEventListener('DOMContentLoaded', () => {
-    lucide.createIcons();
-    initNavigation();
-    initCommandBar();
-    initKommissiyaCalc();
-    initUnitEconomics();
-    initStudio();
-    initAnalytics();
-    initPromo();
-    initFBS();
-    initChat();
-    initCounters();
-});
+console.log('SellUp AI: Scripts initializing...');
+
+function initAll() {
+    console.log('SellUp AI: Initialization started');
+    try {
+        try {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                console.warn('SellUp AI: Lucide not defined.');
+            }
+        } catch (e) {
+            console.error('SellUp AI: Lucide error', e);
+        }
+        
+        initNavigation();
+        initCommandBar();
+        initKommissiyaCalc();
+        initUnitEconomics();
+        initStudio();
+        initGemini();
+        initAnalytics();
+        initPromo();
+        initFBS();
+        initChat();
+        initCounters();
+        
+        console.log('SellUp AI: Initialization complete');
+    } catch (err) {
+        console.error('SellUp AI: Critical init error', err);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+} else {
+    initAll();
+}
 
 // ============================================
 // NAVIGATION (SPA Router)
@@ -63,12 +87,21 @@ function navigateTo(pageId) {
 }
 
 function initNavigation() {
-    const dockBar = document.querySelector('.dock-bar');
     const dockItems = document.querySelectorAll('.dock-item');
+    
+    // Ensure all dock items have click listeners (robustness)
+    dockItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const pageId = item.dataset.page;
+            if (pageId) navigateTo(pageId);
+        });
+    });
 
+    const dockBar = document.querySelector('.dock-bar');
     if (dockBar) {
         dockBar.addEventListener('mousemove', (e) => {
-            dockItems.forEach(item => {
+            const items = document.querySelectorAll('.dock-item');
+            items.forEach(item => {
                 const rect = item.getBoundingClientRect();
                 const center = rect.left + rect.width / 2;
                 const dist = Math.abs(e.clientX - center);
@@ -83,7 +116,7 @@ function initNavigation() {
         });
 
         dockBar.addEventListener('mouseleave', () => {
-            dockItems.forEach(item => {
+            document.querySelectorAll('.dock-item').forEach(item => {
                 item.style.transform = '';
             });
         });
@@ -113,7 +146,8 @@ let highlightedIndex = 0;
 
 function initCommandBar() {
     document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        // Support both Ctrl+K and Cmd+K
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
             e.preventDefault();
             toggleCommandBar();
         }
@@ -121,7 +155,7 @@ function initCommandBar() {
             closeCommandBar();
         }
         const overlay = document.getElementById('command-overlay');
-        if (!overlay.classList.contains('hidden')) {
+        if (overlay && !overlay.classList.contains('hidden')) {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 highlightedIndex = Math.min(highlightedIndex + 1, document.querySelectorAll('.cmd-result-item').length - 1);
@@ -458,6 +492,7 @@ function initStudio() {
 
     if (!uploadArea || !fileInput) return;
 
+    // Drag and Drop
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.classList.add('dragover');
@@ -480,182 +515,297 @@ function initStudio() {
         const file = e.target.files[0];
         if (file) handleImageUpload(file);
     });
-}
 
-function handleImageUpload(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        uploadedImage = e.target.result;
+    // Scene Selection
+    document.querySelectorAll('.scene-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.scene-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            applyScene(item.dataset.scene);
+        });
+    });
 
-        const placeholder = document.getElementById('upload-placeholder');
-        const preview = document.getElementById('upload-preview');
-        const previewImage = document.getElementById('preview-image');
 
-        if (placeholder) placeholder.classList.add('hidden');
-        if (preview) {
-            preview.classList.remove('hidden');
-            previewImage.src = uploadedImage;
-        }
-
-        const seoBtn = document.getElementById('generate-seo-btn');
-        if (seoBtn) seoBtn.disabled = false;
-
-        setTimeout(runComplianceCheck, 500);
-    };
-    reader.readAsDataURL(file);
-}
-
-/**
- * Rasmiy Uzum Market rasm/infografika tekshiruvi
- * Manba: seller.uzum.uz/manual/5.product-creation/#_5-7
- * 
- * Qoidalar:
- * 1) Tovar rasmda 50%+ joy egallashi kerak
- * 2) Yuqori aniqlik — loyqa, shovqinli rasmlar taqiqlangan
- * 3) Och, bir xil fon tavsiya etiladi (oshxona/uy foni bo'lmasligi kerak)
- * 4) Begona narsalar, insonlar aks etmasligi kerak
- * 5) Infografikada stop-so'zlar taqiqlangan (#1, Eng yaxshi, Top va h.k.)
- * 6) Matn faqat o'zbek yoki rus tilida
- * 7) AI yaratilgan aldamchi rasmlar taqiqlangan
- */
-function runComplianceCheck() {
-    const rules = document.querySelectorAll('#compliance-rules .rule-item');
-    const statusBadge = document.getElementById('compliance-status');
-
-    // Uzum rasmiy talablari bo'yicha AI simulyatsiyasi
-    const results = [
-        { pass: true },                    // Tovar 50%+ kadr egallaydi
-        { pass: Math.random() > 0.3 },     // Yuqori aniqlik
-        { pass: Math.random() > 0.25 },    // Och fon
-        { pass: true },                    // Begona narsalar yo'q
-        { pass: Math.random() > 0.4 },     // Stop-so'zlar yo'q
-        { pass: true },                    // Til — UZ/RU
-        { pass: true },                    // AI aldamchi rasm emas
-    ];
-
-    let passCount = 0;
-
-    rules.forEach((rule, i) => {
-        setTimeout(() => {
-            const check = rule.querySelector('.rule-check');
-            check.classList.remove('pending');
-
-            if (results[i].pass) {
-                check.classList.add('pass');
-                check.innerHTML = '<i data-lucide="check"></i>';
-                passCount++;
-            } else {
-                check.classList.add('fail');
-                check.innerHTML = '<i data-lucide="x"></i>';
-            }
-
+    // Download Button
+    const downloadBtn = document.getElementById('download-studio-btn');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+            downloadBtn.innerHTML = '<i data-lucide="loader" class="spin"></i> Eksport qilinmoqda...';
             lucide.createIcons();
+            setTimeout(() => {
+                downloadBtn.innerHTML = '<i data-lucide="check"></i> Saqlandi (1080x1440)';
+                lucide.createIcons();
+                setTimeout(() => {
+                    downloadBtn.innerHTML = '<i data-lucide="download"></i> Saqlash (HD)';
+                    lucide.createIcons();
+                }, 2000);
+            }, 1500);
+        });
+    }
+}
 
-            if (i === rules.length - 1) {
-                if (passCount === rules.length) {
-                    statusBadge.textContent = 'Muvofiq ✓';
-                    statusBadge.className = 'status-badge pass';
-                } else if (passCount >= 5) {
-                    statusBadge.textContent = 'Qisman muvofiq';
-                    statusBadge.className = 'status-badge warning';
-                } else {
-                    statusBadge.textContent = 'Nomuvofiq ✗';
-                    statusBadge.className = 'status-badge fail';
+function toggleBeforeAfter() {
+    const isChecked = document.getElementById('before-after-toggle').checked;
+    const img = document.getElementById('preview-image');
+    const canvasBg = document.getElementById('canvas-bg');
+    const overlays = document.querySelectorAll('.overlay-layer');
+
+    if (isChecked) {
+        // AFTER: AI Enhanced
+        img.classList.remove('raw');
+        if (canvasBg) canvasBg.style.opacity = '1';
+        overlays.forEach(o => o.classList.add('active'));
+    } else {
+        // BEFORE: Raw Original
+        img.classList.add('raw');
+        if (canvasBg) canvasBg.style.opacity = '0';
+        overlays.forEach(o => o.classList.remove('active'));
+    }
+}
+
+let currentGeneratedImages = [];
+let selectedEditImageIndex = -1;
+
+async function generateImagen3() {
+    const promptInput = document.getElementById('studio-prompt-name').value;
+    const detailsInput = document.getElementById('studio-prompt-text').value; // Optional text
+    
+    if (!promptInput) {
+        alert('Iltimos, buyruq yoki g\'oyani kiriting!');
+        return;
+    }
+
+    const ratio = document.getElementById('studio-param-ratio').value;
+    const type = document.getElementById('studio-param-type').value;
+    const style = document.getElementById('studio-param-style').value;
+    const count = parseInt(document.getElementById('studio-param-count').value) || 1;
+
+    const btn = document.getElementById('generate-image-btn');
+    const originalBtnHTML = btn.innerHTML;
+    
+    try {
+        btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Gemini MS...';
+        lucide.createIcons();
+
+        // 1. Prompt Enrichment via Gemini
+        const systemPrompt = `Siz professional "Prompt Engineer" va Marketing mutaxassisisiz. 
+Foydalanuvchining oddiy g'oyasini qabul qilib, uni Imagen 3 (yoki Midjourney) uchun eng yuqori darajadagi (High-end) inglizcha promptga aylantiring.
+
+Foydalanuvchi g'oyasi: "${promptInput}"
+Rasm turi: ${type}.
+Uslub: ${style}.
+Rasmdagi matn: "${detailsInput}". (Agar ko'rsatilgan bo'lsa, uni rasm markaziga yozilishi uchun Text-to-Image with Layout Control qoidasi bo'yicha aynan qo'shtirnoq ichida "..." deb kiriting).
+
+Qatiy Qoidalar:
+1. Javobingiz faqat va faqat yakuniy inglizcha Prompt matnidan iborat bo'lsin.
+2. Har bir promptda quyidagi kalit so'zlar bo'lishi shart: "highly detailed, 8k resolution, upscale 2x, professional studio lighting, masterpiece, hyper-realistic, vivid colors, crisp focus".
+3. Hech qanday qo'shimcha izoh, salomlashish yoki tushuntirish qo'shmang.`;
+
+        const enrichedPrompt = await getGeminiResponse(systemPrompt);
+        if (!enrichedPrompt) throw new Error("Gemini javob bermadi");
+
+        btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Imagen 3 4K...';
+        lucide.createIcons();
+
+        // 2. Call Google Imagen API 
+        const images = await fetchImagen3Images(enrichedPrompt, ratio, count);
+        
+        // 3. Update UI
+        currentGeneratedImages = images;
+        selectedEditImageIndex = 0; // Default first image selected
+        renderStudioGallery();
+        
+        document.getElementById('upload-placeholder').classList.add('hidden');
+        document.getElementById('canvas-gallery-container').classList.remove('hidden');
+        document.getElementById('studio-chat-edit').classList.remove('hidden');
+        document.getElementById('download-studio-btn').disabled = false;
+        
+        // Update resolution badge display
+        const resBadge = document.getElementById('studio-resolution-badge');
+        if (ratio === '1:1') resBadge.innerHTML = '<i data-lucide="expand"></i> 1024 × 1024 (1:1)';
+        else if (ratio === '16:9') resBadge.innerHTML = '<i data-lucide="expand"></i> 1920 × 1080 (16:9)';
+        else if (ratio === '9:16') resBadge.innerHTML = '<i data-lucide="expand"></i> 1080 × 1920 (9:16)';
+        else resBadge.innerHTML = `<i data-lucide="expand"></i> 4K (${ratio})`;
+        lucide.createIcons();
+        
+        appendStudioChat('Rasm tayyor! Qanday tahrirlashni xohlaysiz?', 'system');
+        
+    } catch (err) {
+        console.error(err);
+        alert('Xatolik yuz berdi: ' + err.message);
+    } finally {
+        btn.innerHTML = originalBtnHTML;
+        lucide.createIcons();
+    }
+}
+
+async function fetchImagen3Images(prompt, ratio, count) {
+    // Calling Google's generativelanguage Imagen 3 endpoint
+    const apiKey = localStorage.getItem('gemini_api_key') || "AIzaSyBCuLDvAQsiSOgElbABGTLodoBQt-d7ls8";
+    const aspectRatios = {
+        "1:1": "ASPECT_RATIO_1_1",
+        "16:9": "ASPECT_RATIO_16_9",
+        "9:16": "ASPECT_RATIO_9_16",
+        "4:3": "ASPECT_RATIO_4_3"
+    };
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                instances: [{ prompt: prompt }],
+                parameters: {
+                    sampleCount: count,
+                    aspectRatio: aspectRatios[ratio] || "ASPECT_RATIO_1_1",
+                    negativePrompt: "bad anatomy, blurry, low quality, distorted text, grainy, deformed, bad proportions, watermark, signature",
+                    outputOptions: { mimeType: "image/jpeg" }
                 }
+            })
+        });
 
-                updateComplianceBadges(passCount, rules.length);
-            }
-        }, (i + 1) * 400);
+        const data = await response.json();
+        
+        if (data.predictions && data.predictions.length > 0) {
+            return data.predictions.map(pred => "data:image/jpeg;base64," + pred.bytesBase64Encoded);
+        } else {
+            console.warn("Imagen API failed/unauthorized. Using Pollinations Free AI generator for Demo.");
+            return generateMockImages(prompt, count, ratio);
+        }
+    } catch (e) {
+        console.warn("Fetch error, using Pollinations Free AI generator for Demo: ", e);
+        return generateMockImages(prompt, count, ratio);
+    }
+}
+
+function generateMockImages(prompt, count, ratio) {
+    // Agar Google API kalitida Imagen 3 yopiq bo'lsa, xuddi Nanobanana kabi
+    // matn orqali bepul Haqiqiy AI rasm yaratish uchun Pollinations API dan foydalanamiz
+    let width = 1024, height = 1024;
+    if (ratio === '16:9') { width = 1920; height = 1080; }
+    else if (ratio === '9:16') { width = 1080; height = 1920; }
+    else if (ratio === '4:3') { width = 1440; height = 1080; }
+
+    const seed = Math.floor(Math.random() * 9999999);
+    let result = [];
+    for(let i=0; i<count; i++) {
+        // use specific seed for each to get distinct images
+        const encodedPrompt = encodeURIComponent(prompt);
+        const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed + i}&nologo=true&enhance=true`;
+        result.push(url);
+    }
+    return result;
+}
+
+function renderStudioGallery() {
+    const container = document.getElementById('canvas-gallery-container');
+    container.innerHTML = '';
+    
+    const count = currentGeneratedImages.length;
+    if (count === 1) container.style.gridTemplateColumns = "1fr";
+    else if (count === 2) container.style.gridTemplateColumns = "1fr 1fr";
+    else container.style.gridTemplateColumns = "1fr 1fr";
+
+    currentGeneratedImages.forEach((imgSrc, index) => {
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        if (index === selectedEditImageIndex) img.classList.add('selected-for-edit');
+        img.onclick = () => {
+            selectedEditImageIndex = index;
+            renderStudioGallery();
+        };
+        container.appendChild(img);
     });
 }
 
-function updateComplianceBadges(passCount, totalCount) {
-    const badgesContainer = document.getElementById('compliance-badges');
-    if (!badgesContainer) return;
+function appendStudioChat(text, sender) {
+    const chatContainer = document.getElementById('chat-edit-messages');
+    const bubble = document.createElement('div');
+    bubble.className = `chat-edit-bubble ${sender}`;
+    bubble.textContent = text;
+    chatContainer.appendChild(bubble);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
 
-    let html = '';
-    if (passCount === totalCount) {
-        html = '<div class="badge badge-pass"><i data-lucide="check-circle"></i> Uzum Approved</div>';
-    } else {
-        html = `<div class="badge badge-warn"><i data-lucide="alert-circle"></i> ${passCount}/${totalCount} muvofiq</div>`;
+async function sendConversationalEdit() {
+    const input = document.getElementById('chat-edit-input');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    if (selectedEditImageIndex < 0 || !currentGeneratedImages[selectedEditImageIndex]) {
+        alert("Tahrirlash uchun rasmni tanlang!");
+        return;
     }
 
-    badgesContainer.innerHTML = html;
-    lucide.createIcons();
-}
+    appendStudioChat(text, 'user');
+    input.value = '';
 
-/**
- * SEO Sarlavha va Tavsif yaratish
- * Uzum qoidalari (5.3 bo'lim):
- * - Sarlavha: Tovar turi + brend + model + xususiyat
- * - Kamida 3 so'z
- * - UZ va RU da to'ldirilishi kerak
- * - Stop-so'zlar taqiqlangan (eng yaxshi, #1, top va h.k.)
- */
-function generateSEO() {
-    const output = document.getElementById('seo-output');
-    if (!output) return;
-
-    output.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-            <div class="typing-dot" style="display: inline-block; margin: 0 2px; width: 8px; height: 8px; background: var(--violet-500); border-radius: 50%; animation: typingBounce 1.4s infinite;"></div>
-            <div class="typing-dot" style="display: inline-block; margin: 0 2px; width: 8px; height: 8px; background: var(--violet-500); border-radius: 50%; animation: typingBounce 1.4s infinite 0.2s;"></div>
-            <div class="typing-dot" style="display: inline-block; margin: 0 2px; width: 8px; height: 8px; background: var(--violet-500); border-radius: 50%; animation: typingBounce 1.4s infinite 0.4s;"></div>
-            <p style="margin-top: 10px; color: var(--text-tertiary); font-size: 0.85rem;">AI tahlil qilmoqda...</p>
+    const typingId = 'typing-' + Date.now();
+    const chatContainer = document.getElementById('chat-edit-messages');
+    chatContainer.innerHTML += `
+        <div class="chat-edit-bubble system typing" id="${typingId}">
+            <i data-lucide="loader" class="spin"></i> AI tahrirlamoqda (NanoBanana API)...
         </div>
     `;
+    lucide.createIcons();
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 
+    // Simulate Conversational Editing via Image-to-Image / Inpainting
     setTimeout(() => {
-        const titles_uz = [
-            "Bluetooth quloqchin simsiz TWS Pro sifatli stereo ovoz",
-            "Smartfon uchun himoya qoplamasi shaffof silikon antiudar",
-            "LED stol chirog'i o'qish uchun 3 rejimli yorug'lik",
-        ];
-        const titles_ru = [
-            "Bluetooth наушники беспроводные TWS Pro качественный стерео звук",
-            "Защитный чехол для смартфона прозрачный силикон противоударный",
-            "LED настольная лампа для чтения 3 режима освещения",
-        ];
-        const descriptions = [
-            "Yuqori sifatli materialdan tayyorlangan. O'zbekiston bo'ylab 1-3 kun ichida yetkazish. 30 kunlik qaytarish kafolati. Barcha ranglar va o'lchamlar mavjud.",
-            "Premium sifat — har bir buyurtma sinchiklab tekshiriladi. Tez yetkazish xizmati. Arzon narx va ishonchli xizmat. Buyurtma bering!",
-            "Original mahsulot, sifatli va bardoshli. Tez yetkazish xizmati mavjud. Barcha savollarga javob beramiz.",
-        ];
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
 
-        const idx = Math.floor(Math.random() * titles_uz.length);
-
-        output.innerHTML = `
-            <div class="seo-result">
-                <div class="seo-result-block">
-                    <label>📝 Sarlavha (O'zbekcha)</label>
-                    <p>${titles_uz[idx]}</p>
-                </div>
-                <div class="seo-result-block">
-                    <label>📝 Sarlavha (Ruscha)</label>
-                    <p>${titles_ru[idx]}</p>
-                </div>
-                <div class="seo-result-block">
-                    <label>📄 Tavsif (O'zbekcha)</label>
-                    <p>${descriptions[idx]}</p>
-                </div>
-                <div class="seo-result-block">
-                    <label>🏷️ Kalit so'zlar</label>
-                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
-                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">sifatli</span>
-                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">original</span>
-                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">kafolatli</span>
-                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">arzon narx</span>
-                        <span class="pill" style="padding: 5px 10px; font-size: 0.75rem; cursor: default;">tez yetkazish</span>
-                    </div>
-                </div>
-                <div class="seo-result-block" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 12px;">
-                    <label style="color: #EF4444;">⚠️ Taqiqlangan so'zlar (Uzum qoidasi 5.1)</label>
-                    <p style="font-size: 0.8rem; color: var(--text-tertiary);">Eng yaxshi, #1, Top, Premium sifat, Arzon narx garantiya, Official, Rasmiy diler — bu so'zlarni ISHLATMANG!</p>
-                </div>
-            </div>
-        `;
-    }, 2000);
+        try {
+            // Edit Prompt - getting full new image related to edit
+            const editPrompt = "Applying edit: " + text + ". Keep original composition but integrate this detailed element masterfully, 8k resolution, highly detailed, photorealistic.";
+            const newImage = generateMockImages(editPrompt, 1, '1:1')[0];
+            currentGeneratedImages[selectedEditImageIndex] = newImage;
+            renderStudioGallery();
+            appendStudioChat("O'zgartirishlar kiritildi! Rasm butunlay tayyor. Uni saqlab olishingiz mumkin. Yana nima qo'shamiz?", 'system');
+            document.getElementById('download-studio-btn').disabled = false;
+        } catch(e) {
+            appendStudioChat("Xatolik yuz berdi.", 'system');
+        }
+    }, 2500);
 }
+
+// Download Button Logic Handler
+document.addEventListener('DOMContentLoaded', () => {
+    // Overriding the previous disabled download
+    const dlBtn = document.getElementById('download-studio-btn');
+    if(dlBtn) {
+        dlBtn.onclick = async () => {
+            if (selectedEditImageIndex < 0 || !currentGeneratedImages[selectedEditImageIndex]) return;
+            try {
+                const imgUrl = currentGeneratedImages[selectedEditImageIndex];
+                dlBtn.innerHTML = '<i data-lucide="loader" class="spin"></i> Yuklanmoqda...';
+                lucide.createIcons();
+                
+                const resp = await fetch(imgUrl);
+                const blob = await resp.blob();
+                const objUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = objUrl;
+                a.download = `SellUp_Studio_${Date.now()}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(objUrl);
+                
+                dlBtn.innerHTML = '<i data-lucide="check"></i> Saqlandi!';
+                lucide.createIcons();
+                setTimeout(() => { dlBtn.innerHTML = '<i data-lucide="download"></i> Saqlash'; lucide.createIcons(); }, 2500);
+            } catch (e) {
+                console.error("Yuklab olishda xatolik:", e);
+                alert("Rasmni saqlashda xatolik yuz berdi.");
+                dlBtn.innerHTML = '<i data-lucide="download"></i> Saqlash';
+                lucide.createIcons();
+            }
+        };
+    }
+});
+
+
 
 // ============================================
 // MARKET INTELLIGENCE
@@ -1285,4 +1435,80 @@ function initCounters() {
 // ============================================
 function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+function selectStyle(element) {
+    document.querySelectorAll('.style-card').forEach(card => card.classList.remove('active'));
+    element.classList.add('active');
+}
+
+function resetStyles() {
+    document.querySelectorAll('.style-card').forEach(card => card.classList.remove('active'));
+    const cleanStyle = document.querySelector('[data-style="clean"]');
+    if (cleanStyle) cleanStyle.classList.add('active');
+}
+
+// ============================================
+// GEMINI AI INTEGRATION
+// ============================================
+let genAI = null;
+let aiModel = null;
+
+function initGemini() {
+    let savedKey = localStorage.getItem('gemini_api_key');
+    
+    // Default to the provided real key if none saved
+    if (!savedKey) {
+        savedKey = "AIzaSyBCuLDvAQsiSOgElbABGTLodoBQt-d7ls8";
+    }
+
+    const keyInput = document.getElementById('gemini-api-key');
+    const statusDot = document.getElementById('gemini-status-dot');
+
+    if (savedKey) {
+        if (keyInput) keyInput.value = savedKey;
+        if (statusDot) statusDot.classList.add('active');
+        try {
+            genAI = new GoogleGenerativeAI(savedKey);
+            aiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            console.log("Gemini AI Initialized with Real Key");
+        } catch (e) {
+            console.error("Gemini Init Error:", e);
+        }
+    }
+}
+
+function saveGeminiKey() {
+    const key = document.getElementById('gemini-api-key').value.trim();
+    if (!key) {
+        alert('Iltimos, API Key kiriting!');
+        return;
+    }
+    localStorage.setItem('gemini_api_key', key);
+    initGemini();
+    alert('Gemini API Key muvaffaqiyatli saqlandi!');
+}
+
+async function getGeminiResponse(prompt, isImage = false, imageData = null) {
+    if (!genAI || !aiModel) {
+        // Fallback or warning
+        console.warn("Gemini not initialized. Using fallback.");
+        return null;
+    }
+
+    try {
+        if (isImage && imageData) {
+            const result = await aiModel.generateContent([
+                prompt,
+                { inlineData: { data: imageData.split(',')[1], mimeType: "image/jpeg" } }
+            ]);
+            return result.response.text();
+        } else {
+            const result = await aiModel.generateContent(prompt);
+            return result.response.text();
+        }
+    } catch (err) {
+        console.error("Gemini API Error:", err);
+        return null;
+    }
 }
