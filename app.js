@@ -603,8 +603,11 @@ Qatiy Qoidalar:
 2. Har bir promptda quyidagi kalit so'zlar bo'lishi shart: "highly detailed, 8k resolution, upscale 2x, professional studio lighting, masterpiece, hyper-realistic, vivid colors, crisp focus".
 3. Hech qanday qo'shimcha izoh, salomlashish yoki tushuntirish qo'shmang.`;
 
-        const enrichedPrompt = await getGeminiResponse(systemPrompt);
-        if (!enrichedPrompt) throw new Error("Gemini javob bermadi");
+        let enrichedPrompt = await getGeminiResponse(systemPrompt);
+        if (!enrichedPrompt) {
+            console.warn("Gemini enriched prompt failed. Using raw user input.");
+            enrichedPrompt = `${promptInput}, ${type}, ${style}, highly detailed, 8k resolution, professional studio lighting`;
+        }
 
         btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Imagen 3 4K...';
         lucide.createIcons();
